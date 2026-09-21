@@ -1,18 +1,46 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import { appThemeColors, appThemes } from "@/theme/app-theme";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
+import { Stack } from "expo-router";
+import { openDatabaseSync } from "expo-sqlite";
+import { useColorScheme } from "nativewind";
+import { Text, View } from "react-native";
+import migrations from "../../drizzle/migrations";
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+const expoDb = openDatabaseSync("local.db");
+export const db = drizzle(expoDb);
 
-SplashScreen.preventAutoHideAsync();
+export default function RootLayout() {
+  const { success, error } = useMigrations(db, migrations);
+  const { colorScheme } = useColorScheme();
+  const scheme = colorScheme ?? "light";
+  if (error) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Migration error: {error.message}</Text>
+      </View>
+    );
+  }
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  if (!success) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Migration is in progress...</Text>
+      </View>
+    );
+  }
+
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <View
+      style={[
+        appThemes[scheme],
+        {
+          backgroundColor: appThemeColors[scheme].background,
+          flex: 1,
+        },
+      ]}
+    >
+      <Stack />
+    </View>
   );
 }
