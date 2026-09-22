@@ -1,12 +1,12 @@
 import type { LucideIcon } from "lucide-react-native";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
-import { useAppThemeColor } from "@/theme/app-theme";
 import { cn } from "@/lib/utils";
+import { useAppThemeColor } from "@/theme/app-theme";
 
 type ButtonProps = {
   label: string;
-  onPress: () => void;
+  onPress?: () => void;
   variant?: "primary" | "secondary";
   icon?: LucideIcon;
   loading?: boolean;
@@ -54,7 +54,7 @@ export function Button({
         containerClasses[variant],
         fullWidth ? "w-full" : "self-start",
         disabled && "opacity-40",
-        className
+        className,
       )}
     >
       {loading ? (

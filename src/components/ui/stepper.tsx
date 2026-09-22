@@ -8,15 +8,19 @@ interface StepperProps {
   max?: number;
   step?: number;
   className?: string;
+  targetValue?: number;
+  unit?: string;
 }
 
 export function Stepper({
   value,
   onChange,
-  min = 1,
+  min = 0,
   max = 999,
   step = 1,
   className = "",
+  targetValue,
+  unit = "",
 }: StepperProps) {
   const handleDecrement = () => {
     if (value - step >= min) {
@@ -25,31 +29,54 @@ export function Stepper({
   };
 
   const handleIncrement = () => {
-    if (value + step <= max) {
+    const maxValue = targetValue || max;
+
+    if (value + step <= maxValue) {
       onChange(value + step);
     }
   };
 
+  const isAtMin = value <= min;
+  const isAtMax = value >= (targetValue || max);
+
   return (
     <View
-      className={`flex-row items-center rounded-2xl bg-input p-1 ${className}`}
+      className={`flex-row items-center justify-between rounded-2xl bg-card p-2 border border-border/50 ${className}`}
     >
       <Pressable
         onPress={handleDecrement}
-        className="size-10 items-center justify-center rounded-xl bg-white"
+        disabled={isAtMin}
+        className={`size-10 items-center justify-center rounded-xl bg-muted active:opacity-70 ${
+          isAtMin ? "opacity-40" : ""
+        }`}
       >
-        <Minus size={24} color="#000" />
+        <Minus
+          size={20}
+          className={` ${isAtMin ? "text-muted-foreground" : "text-foreground"}`}
+        />
       </Pressable>
 
-      <View className="flex-1 items-center justify-center min-w-12">
+      <View className="flex-1 flex-row items-baseline justify-center px-2">
         <Text className="text-xl font-bold text-foreground">{value}</Text>
+
+        {targetValue !== undefined && (
+          <Text className="text-base text-muted-foreground ml-1 font-medium">
+            / {targetValue} {unit}
+          </Text>
+        )}
       </View>
 
       <Pressable
         onPress={handleIncrement}
-        className="size-10 items-center justify-center rounded-xl bg-white"
+        disabled={isAtMax}
+        className={`size-10 items-center justify-center rounded-xl bg-muted active:opacity-70 ${
+          isAtMax ? "opacity-40" : ""
+        }`}
       >
-        <Plus size={24} color="#000" />
+        <Plus
+          size={20}
+          className={` ${isAtMax ? "text-muted-foreground" : "text-foreground"}`}
+        />
       </Pressable>
     </View>
   );

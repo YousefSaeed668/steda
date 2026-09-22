@@ -7,6 +7,7 @@ import {
 } from "@/db/schema";
 import { CreateHabitInput, createHabitSchema } from "@/schemas/create-habit";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
 import { addMinutes, format, startOfDay } from "date-fns";
 import { useRouter } from "expo-router";
 import { useForm } from "react-hook-form";
@@ -14,7 +15,7 @@ import { Alert } from "react-native";
 
 export function useCreateHabitForm() {
   const router = useRouter();
-
+const queryClient = useQueryClient();
   const {
     control,
     handleSubmit,
@@ -116,7 +117,9 @@ export function useCreateHabitForm() {
           timeMinutes: values.reminderTime,
         });
       }
-
+      await queryClient.invalidateQueries({
+        queryKey: ["habits"],
+      });
       console.log("✅ Habit created successfully with ID:", createdHabitId);
       router.back();
     } catch (error) {

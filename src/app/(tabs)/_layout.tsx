@@ -3,9 +3,18 @@ import { Tabs } from "expo-router";
 import { ChartSpline, CircleCheck, Settings, Table } from "lucide-react-native";
 const _layout = () => {
   const primary = useAppThemeColor("primary");
-
+  const background = useAppThemeColor("card");
+  const inactive = useAppThemeColor("mutedForeground");
   return (
-    <Tabs screenOptions={{ tabBarActiveTintColor: primary }}>
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: primary,
+        tabBarInactiveTintColor: inactive,
+        tabBarStyle: {
+          backgroundColor: background,
+        },
+      }}
+    >
       <Tabs.Screen
         name="index"
 

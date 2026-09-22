@@ -82,37 +82,37 @@ export const IconColorPicker = ({
               activeItemClassName=""
               options={[
                 {
-                  value: "bg-blue-600",
+                  value: "#2563eb", 
                   icon: (active) => (
                     <Tone colorClass="bg-blue-600" active={active} />
                   ),
                 },
                 {
-                  value: "bg-emerald-500",
+                  value: "#10b981",
                   icon: (active) => (
                     <Tone colorClass="bg-emerald-500" active={active} />
                   ),
                 },
                 {
-                  value: "bg-rose-500",
+                  value: "#f43f5e",
                   icon: (active) => (
                     <Tone colorClass="bg-rose-500" active={active} />
                   ),
                 },
                 {
-                  value: "bg-orange-500",
+                  value: "#f97316",
                   icon: (active) => (
                     <Tone colorClass="bg-orange-500" active={active} />
                   ),
                 },
                 {
-                  value: "bg-purple-500",
+                  value: "#a855f7",
                   icon: (active) => (
                     <Tone colorClass="bg-purple-500" active={active} />
                   ),
                 },
                 {
-                  value: "bg-yellow-400",
+                  value: "#facc15",
                   icon: (active) => (
                     <Tone colorClass="bg-yellow-400" active={active} />
                   ),

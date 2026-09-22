@@ -62,7 +62,7 @@ export function ScreenHeader({
             tone="neutral"
             icon={leftAction.icon}
             disabled={leftAction.disabled}
-            label={leftAction.label ?? "Cancel"}
+            label={leftAction.label ?? ""}
             onPress={handleLeftActionPress}
           />
         ) : showBack ? (
