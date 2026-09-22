@@ -8,6 +8,7 @@ import {
   text,
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
+import * as Crypto from "expo-crypto";
 
 export const habitFrequencyValues = [
   "DAILY",
@@ -22,7 +23,7 @@ export type ThemeMode = (typeof themeModeValues)[number];
 export const habit = sqliteTable("Habit", {
   id: text("id")
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .$defaultFn(() => Crypto.randomUUID()),
   name: text("name").notNull(),
   description: text("description"),
   icon: text("icon"),
@@ -65,7 +66,7 @@ export const habitEntry = sqliteTable(
   {
     id: text("id")
       .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
+      .$defaultFn(() => Crypto.randomUUID()),
     habitId: text("habitId")
       .notNull()
       .references(() => habit.id, { onDelete: "cascade" }),
@@ -97,7 +98,7 @@ export const habitEntry = sqliteTable(
 export const habitReminder = sqliteTable("HabitReminder", {
   id: text("id")
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .$defaultFn(() => Crypto.randomUUID()),
   habitId: text("habitId")
     .notNull()
     .references(() => habit.id, { onDelete: "cascade" }),
