@@ -43,6 +43,22 @@ export function isHabitScheduledOn(habit: HabitLike, date: Date) {
   return true;
 }
 
+export function getCompletionRatioForDate(habits: HabitLike[], date: Date) {
+  const scheduledHabits = habits.filter((habit) =>
+    isHabitScheduledOn(habit, date),
+  );
+
+  if (scheduledHabits.length === 0) return 0;
+
+  const dateKey = toDateKey(date);
+  const completedCount = scheduledHabits.filter((habit) => {
+    const entry = habit.entries.find((item) => item.dateKey === dateKey);
+    return (entry?.value ?? 0) > 0;
+  }).length;
+
+  return completedCount / scheduledHabits.length;
+}
+
 export function getFrequencyLabel(habit: HabitLike) {
   if (habit.frequency === "TIMES_PER_WEEK") {
     return `${habit.timesPerWeek ?? 0}x per week`;
