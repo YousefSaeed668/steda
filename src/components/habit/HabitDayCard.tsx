@@ -1,6 +1,13 @@
-import { getCurrentStreak, getDetailLabel, getFrequencyLabel, getHabitIcon, toDateKey, type HabitLike } from "@/lib/habit";
+import {
+  getCurrentStreak,
+  getDetailLabel,
+  getFrequencyLabel,
+  getHabitIcon,
+  toDateKey,
+  type HabitLike,
+} from "@/lib/habit";
 import { useAppThemeColor } from "@/theme/app-theme";
-import { Check, Flame } from "lucide-react-native";
+import { Check, Rocket, Minus } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
 export type HabitDayCardData = HabitLike & {
@@ -20,6 +27,7 @@ export type HabitDayCardProps = {
   onPress?: () => void;
   onToggle?: (completed: boolean) => void;
   isUpdating?: boolean;
+  appearance?: "default" | "history";
 };
 
 export function HabitDayCard({
@@ -28,6 +36,7 @@ export function HabitDayCard({
   onPress,
   onToggle,
   isUpdating = false,
+  appearance = "default",
 }: HabitDayCardProps) {
   const primary = useAppThemeColor("primary");
   const mutedForeground = useAppThemeColor("mutedForeground");
@@ -36,9 +45,20 @@ export function HabitDayCard({
   const Icon = getHabitIcon(habit.icon);
   const entry = habit.entries.find((item) => item.dateKey === toDateKey(date));
   const completed = (entry?.value ?? 0) > 0;
+  const isHistory = appearance === "history";
   const reminder = habit.reminders.find((item) => item.enabled);
   const detail = getDetailLabel(habit, reminder);
   const streak = getCurrentStreak(habit, date);
+
+  const nameColor = isHistory
+    ? completed
+      ? "text-foreground"
+      : "text-muted-foreground"
+    : completed
+      ? "text-muted-foreground"
+      : "text-foreground";
+  const iconTileColor = isHistory && !completed ? "bg-muted" : "bg-accent/90";
+  const indicatorColor = completed ? "bg-success" : "bg-muted";
 
   return (
     <Pressable
@@ -48,19 +68,25 @@ export function HabitDayCard({
       accessibilityLabel={onPress ? `Open ${habit.name}` : habit.name}
       className="flex-row items-center rounded-2xl border border-border bg-card p-3 active:opacity-70"
     >
-      <View className="h-12 w-12 items-center justify-center rounded-xl bg-accent/90">
-        <Icon color={habit.color ?? primary} size={22} />
+      <View
+        className={`h-12 w-12 items-center justify-center rounded-xl ${iconTileColor}`}
+      >
+        <Icon
+          color={isHistory && !completed ? mutedForeground : habit.color ?? primary}
+          size={22}
+        />
       </View>
+
       <View className="ml-3 flex-1">
-        <Text className={`text-base font-bold ${completed ? "text-muted-foreground" : "text-foreground"}`}>
-          {habit.name}
-        </Text>
+        <Text className={`text-base font-bold ${nameColor}`}>{habit.name}</Text>
         <Text numberOfLines={1} className="mt-1 text-xs text-muted-foreground">
           {getFrequencyLabel(habit)}{detail ? ` • ${detail}` : ""}
         </Text>
         <View className="mt-1 flex-row items-center gap-1">
-          <Flame size={13} color={warning} />
-          <Text className="text-xs font-medium text-warning">{streak}d streak</Text>
+          <Rocket size={13} color={warning} />
+          <Text className="text-xs font-medium text-warning">
+            {streak}d streak
+          </Text>
         </View>
         {habit.description ? (
           <Text numberOfLines={1} className="mt-1 text-xs text-muted-foreground">
@@ -68,6 +94,7 @@ export function HabitDayCard({
           </Text>
         ) : null}
       </View>
+
       {onToggle ? (
         <Pressable
           onPress={(event) => {
@@ -78,13 +105,27 @@ export function HabitDayCard({
           accessibilityRole="checkbox"
           accessibilityState={{ checked: completed, disabled: isUpdating }}
           accessibilityLabel={`${completed ? "Uncomplete" : "Complete"} ${habit.name}`}
-          className={`ml-3 h-9 w-9 items-center justify-center rounded-full ${completed ? "bg-success" : "bg-muted"}`}
+          className={`ml-3 h-9 w-9 items-center justify-center rounded-full ${indicatorColor}`}
         >
-          {completed ? <Check size={20} color={card} strokeWidth={3} /> : null}
+          {completed ? (
+            <Check size={20} color={card} strokeWidth={3} />
+          ) : isHistory ? (
+            <Minus size={19} color={mutedForeground} strokeWidth={2.5} />
+          ) : null}
         </Pressable>
       ) : (
-        <View className="ml-3 h-9 w-9 items-center justify-center rounded-full bg-muted">
-          {completed ? <Check size={20} color={mutedForeground} strokeWidth={3} /> : null}
+        <View
+          className={`ml-3 h-9 w-9 items-center justify-center rounded-full ${indicatorColor}`}
+        >
+          {completed ? (
+            <Check
+              size={20}
+              color={isHistory ? card : mutedForeground}
+              strokeWidth={3}
+            />
+          ) : isHistory ? (
+            <Minus size={19} color={mutedForeground} strokeWidth={2.5} />
+          ) : null}
         </View>
       )}
     </Pressable>

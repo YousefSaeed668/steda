@@ -8,7 +8,7 @@ import {
   type HabitLike,
 } from "@/lib/habit";
 
-type WeekStartsOn = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+export type WeekStartsOn = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export type DayStripDayProps = {
   date: Date;
@@ -25,8 +25,6 @@ export function DayStripDay({
   habits,
   onPress,
 }: DayStripDayProps) {
-  const primary = useAppThemeColor("primary");
-  const primaryForeground = useAppThemeColor("primaryForeground");
   const success = useAppThemeColor("success");
   const isToday = isSameDay(date, today);
   const isPreviousDay = date < today && !isToday;

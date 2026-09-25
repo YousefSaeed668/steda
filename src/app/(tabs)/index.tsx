@@ -7,7 +7,7 @@ import { useTodayScreen } from "@/hooks/useTodayScreen";
 import { useAppThemeColor } from "@/theme/app-theme";
 import { format } from "date-fns";
 import { useRouter } from "expo-router";
-import { CalendarDays, CircleAlert, Flame, Target } from "lucide-react-native";
+import { CalendarDays, CircleAlert, Rocket, Target } from "lucide-react-native";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 
 const getGreeting = (date: Date) => {
@@ -44,7 +44,7 @@ const TodayScreen = () => {
       <TabHeader
         title="Today"
         rightAction={{
-          label: "Open history",
+          label: "History",
           icon: CalendarDays,
           tone: "neutral",
           onPress: () => router.push("/history" as never),
@@ -76,7 +76,7 @@ const TodayScreen = () => {
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center gap-3">
               <View className="h-10 w-10 items-center justify-center rounded-full bg-warning/15">
-                <Flame size={20} color={warning} />
+                <Rocket size={20} color={warning} />
               </View>
               <Text className="text-base font-bold text-foreground">
                 {totalStreak} day streak

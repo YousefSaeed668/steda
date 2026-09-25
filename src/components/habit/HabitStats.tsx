@@ -1,5 +1,5 @@
 import { useAppThemeColor } from "@/theme/app-theme";
-import { CheckCircle2, Flame, PieChart, Trophy } from "lucide-react-native";
+import { CheckCircle2, PieChart, Rocket, Trophy } from "lucide-react-native";
 import { Text, View } from "react-native";
 import { Card } from "../ui/card";
 
@@ -41,7 +41,7 @@ export const HabitStats = ({
             <Text className="mb-3 font-semibold uppercase tracking-wider text-muted-foreground">
               CURRENT STREAK
             </Text>
-            <Flame size={18} color={warning} />
+            <Rocket size={18} color={warning} />
           </View>
           <Text className="text-2xl font-bold text-foreground mb-1">
             {currentStreak} days

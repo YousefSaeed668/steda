@@ -92,7 +92,7 @@ export const HabitRow = ({
                   <View
                     key={index}
                     className={`size-3.5 rounded-full ${
-                      done ? "bg-success" : "bg-secondary"
+                      done ? "bg-success" : "bg-gray-200"
                     }`}
                   />
                 ))}
@@ -115,7 +115,9 @@ export const HabitRow = ({
               )}
             </View>
           </View>
-          {showStatusBadge&&<ChevronRight color={mutedForeground} size={18} />}
+          {!showStatusBadge && (
+            <ChevronRight color={mutedForeground} size={18} />
+          )}
         </View>
       </View>
     </Link>
