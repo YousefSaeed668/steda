@@ -7,7 +7,7 @@ import {
 } from "@/db/schema";
 import { CreateHabitInput, createHabitSchema } from "@/schemas/create-habit";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { QueryClient, useQueryClient } from "@tanstack/react-query";
+import {useQueryClient } from "@tanstack/react-query";
 import { addMinutes, format, startOfDay } from "date-fns";
 import { useRouter } from "expo-router";
 import { useForm } from "react-hook-form";

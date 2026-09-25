@@ -6,7 +6,7 @@ export interface SegmentedControlOption<T> {
 }
 
 interface SegmentedControlProps<T> {
-  options: SegmentedControlOption<T>[];
+  options: readonly SegmentedControlOption<T>[];
   value: T;
   onChange: (value: T) => void;
   className?: string;

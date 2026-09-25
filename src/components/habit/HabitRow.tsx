@@ -115,7 +115,7 @@ export const HabitRow = ({
               )}
             </View>
           </View>
-          <ChevronRight color={mutedForeground} size={18} />
+          {showStatusBadge&&<ChevronRight color={mutedForeground} size={18} />}
         </View>
       </View>
     </Link>

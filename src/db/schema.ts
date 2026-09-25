@@ -112,16 +112,56 @@ export const habitReminder = sqliteTable("HabitReminder", {
 
 export const appSettings = sqliteTable("AppSettings", {
   id: integer("id").primaryKey().default(1),
-  theme: text("theme", { enum: themeModeValues }).notNull().default("SYSTEM"),
+
+  theme: text("theme", {
+    enum: themeModeValues,
+  })
+    .notNull()
+    .default("SYSTEM"),
+
   weekStartsOn: integer("weekStartsOn").notNull().default(1),
-  notificationsEnabled: integer("notificationsEnabled", { mode: "boolean" })
+
+  notificationsEnabled: integer("notificationsEnabled", {
+    mode: "boolean",
+  })
     .notNull()
     .default(true),
 
-  createdAt: integer("createdAt", { mode: "timestamp_ms" })
+  quietHoursEnabled: integer("quietHoursEnabled", {
+    mode: "boolean",
+  })
+    .notNull()
+    .default(true),
+
+  quietHoursStartMinutes: integer("quietHoursStartMinutes")
+    .notNull()
+    .default(1320),
+
+  quietHoursEndMinutes: integer("quietHoursEndMinutes").notNull().default(420),
+
+  soundEnabled: integer("soundEnabled", {
+    mode: "boolean",
+  })
+    .notNull()
+    .default(true),
+
+  hapticsEnabled: integer("hapticsEnabled", {
+    mode: "boolean",
+  })
+    .notNull()
+    .default(true),
+
+  customSoundUri: text("customSoundUri"),
+
+  createdAt: integer("createdAt", {
+    mode: "timestamp_ms",
+  })
     .notNull()
     .$defaultFn(() => new Date()),
-  updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+
+  updatedAt: integer("updatedAt", {
+    mode: "timestamp_ms",
+  })
     .notNull()
     .$defaultFn(() => new Date())
     .$onUpdateFn(() => new Date()),

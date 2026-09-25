@@ -45,7 +45,7 @@ const _layout = () => {
       <Tabs.Screen
         name="settings"
         options={{
-          title: "Setiisngs",
+          title: "Settings",
           headerShown: false,
 
           tabBarIcon: ({ color }) => <Settings color={color} />,

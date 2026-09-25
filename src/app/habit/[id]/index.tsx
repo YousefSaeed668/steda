@@ -188,6 +188,10 @@ const Index = () => {
           icon: ArrowLeft,
           onPress: () => router.back(),
         }}
+        rightAction={{
+          label: "Edit",
+          onPress: () => router.push(`/habit/${id}/edit`),
+        }}
       />
 
       <ScrollView showsVerticalScrollIndicator={false}>
