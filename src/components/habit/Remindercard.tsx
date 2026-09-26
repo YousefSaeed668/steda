@@ -43,7 +43,7 @@ export const ReminderCard = ({
         </View>
       </Card>
       {reminderEnabled && (
-        <View className="flex-row items-center border-border border justify-between pt-4 bg-accent/90  rounded-b-xl  p-4 ">
+        <View className="flex-row items-center border-border border justify-between pt-4 bg-input-border  rounded-b-xl  p-4 ">
           <View className="flex-row gap-2 items-center">
             <Clock size={18} color={primary} />
             <Text className="text-foreground font-medium text-[16px]">

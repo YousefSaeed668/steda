@@ -61,7 +61,7 @@ export const CadenceCard = ({
                   value={value}
                   onChange={onChange}
                   multiple
-                  itemClassName="h-12 w-12 rounded-full bg-input"
+                  itemClassName="h-10 w-10 rounded-full bg-input"
                   activeItemClassName="bg-primary"
                   labelClassName="font-medium text-foreground"
                   activeLabelClassName="text-white"

@@ -27,7 +27,12 @@ export const TargetCard = ({
           control={control}
           name="targetValue"
           render={({ field: { onChange, value } }) => (
-            <Stepper value={value || 0} onChange={onChange} min={1} />
+            <Stepper
+              value={value || 0}
+              onChange={onChange}
+              min={1}
+              className="min-w-40"
+            />
           )}
         />
       </View>
