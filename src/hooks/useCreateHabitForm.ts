@@ -6,6 +6,7 @@ import {
   habitScheduleDay,
 } from "@/db/schema";
 import { CreateHabitInput, createHabitSchema } from "@/schemas/create-habit";
+import { syncScheduledHabitNotifications } from "@/lib/notifications";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {useQueryClient } from "@tanstack/react-query";
 import { addMinutes, format, startOfDay } from "date-fns";
@@ -117,6 +118,9 @@ const queryClient = useQueryClient();
           timeMinutes: values.reminderTime,
         });
       }
+      await syncScheduledHabitNotifications({
+        requestPermission: values.reminderEnabled,
+      });
       await queryClient.invalidateQueries({
         queryKey: ["habits"],
       });

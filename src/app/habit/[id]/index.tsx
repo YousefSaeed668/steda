@@ -35,6 +35,7 @@ import {
   toDateKey,
 } from "@/lib/habit";
 import { useAppThemeColor } from "@/theme/app-theme";
+import { syncScheduledHabitNotifications } from "@/lib/notifications";
 
 const Index = () => {
   const router = useRouter();
@@ -118,6 +119,8 @@ const Index = () => {
           archivedAt: shouldArchive ? new Date() : null,
         })
         .where(eq(habit.id, id));
+
+      await syncScheduledHabitNotifications();
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({

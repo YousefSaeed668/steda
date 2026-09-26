@@ -26,7 +26,7 @@ export const ReminderCard = ({
             </View>
             <View>
               <Text className="text-foreground font-semibold text-lg">
-                Daily Reminder
+                Habit Reminder
               </Text>
               <Text className="text-muted-foreground text-sm">
                 Gentle notifications to reflect

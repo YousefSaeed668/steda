@@ -17,6 +17,7 @@ import {
   CreateHabitInput,
 } from "@/schemas/create-habit";
 import { useAppThemeColor } from "@/theme/app-theme";
+import { syncScheduledHabitNotifications } from "@/lib/notifications";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   useMutation,
@@ -179,6 +180,10 @@ const EditHabitForm = ({
           timeMinutes: values.reminderTime,
         });
       }
+
+      await syncScheduledHabitNotifications({
+        requestPermission: values.reminderEnabled,
+      });
     },
 
     onSuccess: async () => {

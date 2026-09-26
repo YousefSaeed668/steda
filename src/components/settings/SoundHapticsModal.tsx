@@ -42,7 +42,7 @@ export const SoundHapticsModal = ({ visible, soundEnabled, hapticsEnabled, custo
           );
         })}
         <Pressable onPress={onDeviceSoundPress} className="mb-2 flex-row items-center justify-between rounded-xl bg-muted px-4 py-4">
-          <View><Text className="font-semibold text-foreground">Choose from device</Text><Text className="mt-1 text-xs text-muted-foreground">Select an audio file from your phone</Text></View>
+          <View><Text className="font-semibold text-foreground">Choose from device</Text><Text className="mt-1 text-xs text-muted-foreground">Used for in-app playback</Text></View>
           <Upload size={18} color={mutedForeground} />
         </Pressable>
         <Pressable onPress={onPreviewPress} className="mt-4 items-center rounded-xl bg-primary py-4">

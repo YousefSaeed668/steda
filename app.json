@@ -14,6 +14,9 @@
     "android": {
       "package": "com.yousef.steda",
       "icon": "./assets/images/icon.png",
+      "permissions": [
+        "SCHEDULE_EXACT_ALARM"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundColor": "#F7F8FA"
@@ -36,7 +39,18 @@
       ],
       "@react-native-community/datetimepicker",
       "expo-sharing",
-      "expo-audio"
+      "expo-audio",
+      [
+        "expo-notifications",
+        {
+          "color": "#4F46E5",
+          "sounds": [
+            "./assets/sounds/chime.mp3",
+            "./assets/sounds/bell.mp3",
+            "./assets/sounds/soft-notification.mp3"
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

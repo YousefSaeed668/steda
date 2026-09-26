@@ -19,6 +19,7 @@ import {
   type BundledSound,
 } from "@/lib/settings";
 import { useAppThemeColor } from "@/theme/app-theme";
+import { syncScheduledHabitNotifications } from "@/lib/notifications";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
@@ -115,12 +116,16 @@ export const useSettingsScreen = () => {
   const importMutation = useMutation({
     mutationFn: importBackup,
     onSuccess: async (imported) => {
-      if (imported) await queryClient.invalidateQueries();
+      if (imported) {
+        await syncScheduledHabitNotifications();
+        await queryClient.invalidateQueries();
+      }
     },
   });
   const resetMutation = useMutation({
     mutationFn: resetAllData,
     onSuccess: async () => {
+      await syncScheduledHabitNotifications();
       await queryClient.invalidateQueries();
       setColorScheme("system");
     },
@@ -165,6 +170,7 @@ export const useSettingsScreen = () => {
         type: "quiet-end",
         value: quietEndDraft,
       });
+      await syncScheduledHabitNotifications();
       setQuietHoursVisible(false);
     } catch {
       Alert.alert("Error", "Could not save quiet hours.");
@@ -175,6 +181,7 @@ export const useSettingsScreen = () => {
     try {
       const uri = `bundled:${sound.id}`;
       await soundMutation.mutateAsync(uri);
+      await syncScheduledHabitNotifications();
       if (soundEnabled) await playSelectedSound(uri);
       if (hapticsEnabled) await Haptics.selectionAsync();
       setSoundModalVisible(false);
@@ -188,6 +195,7 @@ export const useSettingsScreen = () => {
     try {
       const uri = await pickCustomSound();
       if (!uri) return;
+      await syncScheduledHabitNotifications();
       if (soundEnabled) await playSelectedSound(uri);
       if (hapticsEnabled) await Haptics.selectionAsync();
       await queryClient.invalidateQueries({ queryKey: ["app-settings"] });
@@ -254,6 +262,33 @@ export const useSettingsScreen = () => {
     );
   };
 
+  const handleNotificationsChange = async (value: boolean) => {
+    try {
+      await settingsMutation.mutateAsync({ type: "notifications", value });
+      const result = await syncScheduledHabitNotifications({
+        requestPermission: value,
+      });
+
+      if (value && result.status === "permission-denied") {
+        Alert.alert(
+          "Notifications are off",
+          "Allow notifications in your device settings to receive habit reminders.",
+        );
+      }
+    } catch {
+      Alert.alert("Error", "Could not update reminder settings.");
+    }
+  };
+
+  const handleSoundEnabledChange = async (value: boolean) => {
+    try {
+      await settingsMutation.mutateAsync({ type: "sound-enabled", value });
+      await syncScheduledHabitNotifications();
+    } catch {
+      Alert.alert("Error", "Could not update sound settings.");
+    }
+  };
+
   return {
     colors: { primary, mutedForeground, success, destructive },
     settingsQuery,
@@ -284,6 +319,8 @@ export const useSettingsScreen = () => {
     setQuietStartDraft,
     setQuietEndDraft,
     handleThemeChange,
+    handleNotificationsChange,
+    handleSoundEnabledChange,
     openQuietHours,
     saveQuietHours,
     chooseBundledSound,

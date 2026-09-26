@@ -47,7 +47,7 @@ const Settings = () => {
           soundEnabled={screen.soundEnabled}
           busy={screen.busy}
           weekLabel={screen.selectedWeekLabel}
-          onNotificationsChange={(value) => screen.settingsMutation.mutate({ type: "notifications", value })}
+          onNotificationsChange={screen.handleNotificationsChange}
           onQuietHoursPress={screen.openQuietHours}
           onSoundPress={() => screen.setSoundModalVisible(true)}
           onWeekPress={() => {
@@ -96,7 +96,7 @@ const Settings = () => {
         bundledSounds={bundledSounds}
         mutedForeground={colors.mutedForeground}
         onClose={() => screen.setSoundModalVisible(false)}
-        onSoundChange={(value) => screen.settingsMutation.mutate({ type: "sound-enabled", value })}
+        onSoundChange={screen.handleSoundEnabledChange}
         onHapticsChange={(value) => screen.settingsMutation.mutate({ type: "haptics-enabled", value })}
         onBundledSoundPress={screen.chooseBundledSound}
         onDeviceSoundPress={screen.chooseDeviceSound}
