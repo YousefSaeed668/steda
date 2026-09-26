@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { startOfDay } from "date-fns";
 import { and, eq } from "drizzle-orm";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   ArrowLeft,
   ChevronRight,
@@ -49,6 +50,7 @@ const Index = () => {
   const mutedForeground = useAppThemeColor("mutedForeground");
 
   const today = startOfDay(new Date());
+  const todayKey = toDateKey(today);
 
   const habitQuery = useQuery({
     queryKey: ["habit", id],
@@ -76,16 +78,23 @@ const Index = () => {
     queryFn: getAppSettings,
   });
 
+  const persistedSessionValue =
+    habitQuery.data?.entries.find((entry) => entry.dateKey === todayKey)
+      ?.value ?? 0;
+  const [sessionValue, setSessionValue] = useState(persistedSessionValue);
+
+  useEffect(() => {
+    setSessionValue(persistedSessionValue);
+  }, [id, persistedSessionValue]);
+
   const completeMutation = useMutation({
     mutationFn: async (amount: number) => {
       if (!id) {
         throw new Error("Habit id is required");
       }
 
-      const dateKey = toDateKey(today);
-
       const existingEntry = await db.query.habitEntry.findFirst({
-        where: and(eq(habitEntry.habitId, id), eq(habitEntry.dateKey, dateKey)),
+        where: and(eq(habitEntry.habitId, id), eq(habitEntry.dateKey, todayKey)),
       });
 
       if (existingEntry) {
@@ -102,7 +111,7 @@ const Index = () => {
 
       await db.insert(habitEntry).values({
         habitId: id,
-        dateKey,
+        dateKey: todayKey,
         value: amount,
         completedAt: new Date(),
       });
@@ -127,14 +136,35 @@ const Index = () => {
         })
         .where(eq(habit.id, id));
 
-      await syncScheduledHabitNotifications();
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
+    onMutate: async (shouldArchive) => {
+      await queryClient.cancelQueries({ queryKey: ["habit", id] });
+
+      const previousHabit = queryClient.getQueryData(["habit", id]);
+      queryClient.setQueryData(["habit", id], (current: typeof habitQuery.data) =>
+        current
+          ? { ...current, archivedAt: shouldArchive ? new Date() : null }
+          : current,
+      );
+
+      return { previousHabit };
+    },
+    onError: (_error, _shouldArchive, context) => {
+      if (context?.previousHabit) {
+        queryClient.setQueryData(["habit", id], context.previousHabit);
+      }
+    },
+    onSuccess: () => {
+      void syncScheduledHabitNotifications().catch((error) => {
+        console.error("Failed to refresh habit reminders:", error);
+      });
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({
         queryKey: ["habit", id],
       });
 
-      await queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: ["habits"],
       });
     },
@@ -166,6 +196,13 @@ const Index = () => {
   const weekStartsOn = (settingsQuery.data?.weekStartsOn ?? 1) as WeekStartsOn;
 
   const isArchived = Boolean(currentHabit.archivedAt);
+  const archiveActionLabel = archiveMutation.isPending
+    ? archiveMutation.variables
+      ? "Pausing..."
+      : "Resuming..."
+    : isArchived
+      ? "Resume habit"
+      : "Pause habit";
 
   const reminder = currentHabit.reminders[0];
 
@@ -194,14 +231,12 @@ const Index = () => {
   const detailLabel = getDetailLabel(currentHabit, reminder);
 
   const todayEntry = currentHabit.entries.find(
-    (entry) => entry.dateKey === toDateKey(today),
+    (entry) => entry.dateKey === todayKey,
   );
 
   const isCompletedToday = (todayEntry?.value ?? 0) > 0;
 
   const targetValue = currentHabit.targetValue ?? 1;
-
-  const sessionValue = todayEntry?.value ?? targetValue;
 
   return (
     <SafeAreaScreen>
@@ -223,6 +258,7 @@ const Index = () => {
             <HabitRow
               id={currentHabit.id}
               name={currentHabit.name}
+              description={currentHabit.description}
               frequencyLabel={frequencyLabel}
               detailLabel={detailLabel}
               Icon={getHabitIcon(currentHabit.icon)}
@@ -254,7 +290,7 @@ const Index = () => {
               <Stepper
                 targetValue={targetValue}
                 value={sessionValue}
-                onChange={() => {}}
+                onChange={setSessionValue}
                 unit={currentHabit.targetUnit ?? ""}
               />
             </Card>
@@ -265,13 +301,18 @@ const Index = () => {
                   ? "Saving..."
                   : isCompletedToday
                     ? "Completed"
-                    : `Log & Complete ${targetValue}${currentHabit.targetUnit ?? ""}`
+                    : `Log & Complete ${sessionValue}${currentHabit.targetUnit ? ` ${currentHabit.targetUnit}` : ""}`
               }
               className="my-2 h-14"
               icon={CircleCheck}
-              disabled={completeMutation.isPending || isCompletedToday}
+              disabled={
+                completeMutation.isPending ||
+                isCompletedToday ||
+                isArchived ||
+                sessionValue <= 0
+              }
               onPress={() => {
-                completeMutation.mutate(targetValue);
+                completeMutation.mutate(sessionValue);
               }}
             />
           </Card>
@@ -309,13 +350,7 @@ const Index = () => {
               )}
 
               <Text className="text-foreground font-medium text-lg">
-                {archiveMutation.isPending
-                  ? isArchived
-                    ? "Resuming..."
-                    : "Pausing..."
-                  : isArchived
-                    ? "Resume habit"
-                    : "Pause habit"}
+                {archiveActionLabel}
               </Text>
             </View>
 

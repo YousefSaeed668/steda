@@ -13,6 +13,7 @@ import {
   QueryClientProvider,
   useQueryClient,
 } from "@tanstack/react-query";
+import { StatusBar } from "expo-status-bar";
 import { router, Stack } from "expo-router";
 import * as Notifications from "expo-notifications";
 import { useColorScheme } from "nativewind";
@@ -87,12 +88,16 @@ export default function RootLayout() {
           },
         ]}
       >
+        <StatusBar style={scheme === "dark" ? "light" : "dark"} />
         <TypographyProvider>
           <DatabaseProvider>
             <ReminderNotificationObserver />
             <Stack
               screenOptions={{
                 headerShown: false,
+                contentStyle: {
+                  backgroundColor: appThemeColors[scheme].background,
+                },
               }}
             >
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

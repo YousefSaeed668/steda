@@ -12,6 +12,7 @@ type IconComponent = ComponentType<{
 type HabitRowProps = {
   id: string;
   name: string;
+  description?: string | null;
   frequencyLabel: string;
   detailLabel: string;
   Icon: IconComponent;
@@ -26,6 +27,7 @@ type HabitRowProps = {
 export const HabitRow = ({
   id,
   name,
+  description,
   frequencyLabel,
   detailLabel,
   Icon,
@@ -51,7 +53,7 @@ export const HabitRow = ({
 
           <View className="flex-1">
             <View className="flex-row items-center gap-2 justify-between">
-              <Text className="font-bold text-xl">
+              <Text className="text-xl font-bold text-foreground">
                 {name}
                 <Text className="text-base font-normal text-muted-foreground">
                   {" "}
@@ -85,6 +87,12 @@ export const HabitRow = ({
             {detailLabel && (
               <Text className="text-muted-foreground">{detailLabel}</Text>
             )}
+
+            {description ? (
+              <Text numberOfLines={2} className="mt-1 text-sm text-muted-foreground">
+                {description}
+              </Text>
+            ) : null}
 
             <View className="flex-row gap-4 items-center">
               <View className="flex-row gap-1 mt-2">

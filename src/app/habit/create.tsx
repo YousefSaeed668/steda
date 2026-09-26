@@ -27,7 +27,7 @@ const CreateHabitScreen = () => {
 
   return (
     <SafeAreaScreen>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <ScreenHeader
           title="Create Habit"
           leftAction={{
@@ -73,7 +73,7 @@ const CreateHabitScreen = () => {
           <SummaryCard title={summaryTitle} primaryColor={primary} />
         </View>
       </ScrollView>
-      <View className="absolute bottom-2 left-0 right-0 bg-background px-4 py-4 border-t border-border">
+      <View className="border-t border-border bg-background px-4 py-4">
         <Button
           label="Create Habit"
           onPress={handleSubmit(onSubmit)}

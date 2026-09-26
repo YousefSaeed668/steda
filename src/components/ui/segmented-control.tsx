@@ -27,7 +27,7 @@ export function SegmentedControl<T>({
             key={index}
             onPress={() => onChange(option.value)}
             className={`flex-1 items-center justify-center rounded-xl py-3 ${
-              isActive ? "bg-white" : "bg-transparent"
+              isActive ? "bg-card" : "bg-transparent"
             }`}
           >
             <Text

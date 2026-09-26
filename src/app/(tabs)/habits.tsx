@@ -79,6 +79,7 @@ const Habits = () => {
       return {
         id: row.id,
         name: row.name,
+        description: row.description,
         color: row.color ?? "#6366f1",
         Icon: getHabitIcon(row.icon),
         frequencyLabel: getFrequencyLabel(row, weekStartsOn),
@@ -200,6 +201,7 @@ const Habits = () => {
               <HabitRow
                 id={item.id}
                 name={item.name}
+                description={item.description}
                 frequencyLabel={item.frequencyLabel}
                 detailLabel={item.detailLabel}
                 Icon={item.Icon}
