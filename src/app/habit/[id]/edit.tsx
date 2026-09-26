@@ -307,6 +307,7 @@ const EditHabitScreen = () => {
   }>();
 
   const habitId = Array.isArray(id) ? id[0] : id;
+  const primary = useAppThemeColor("primary");
 
   const habitQuery = useQuery({
     queryKey: ["habit-edit", habitId],
@@ -318,7 +319,7 @@ const EditHabitScreen = () => {
     return (
       <SafeAreaScreen>
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color={primary} />
 
           <Text className="mt-4 text-muted-foreground">
             Loading habit...

@@ -1,4 +1,5 @@
 import { toDateKey } from "@/lib/habit";
+import { useAppThemeColor } from "@/theme/app-theme";
 import { format } from "date-fns";
 import { Check, Hourglass, Minus, X } from "lucide-react-native";
 import { useState } from "react";
@@ -11,6 +12,7 @@ type HistoryEntry = {
   dateKey: string;
   value: number;
   completedAt: Date | null;
+  note: string | null;
 };
 
 type RecentHistoryProps = {
@@ -20,6 +22,8 @@ type RecentHistoryProps = {
 
 export const RecentHistory = ({ entries, isLoading }: RecentHistoryProps) => {
   const [modalVisible, setModalVisible] = useState(false);
+  const foreground = useAppThemeColor("foreground");
+  const mutedForeground = useAppThemeColor("mutedForeground");
   const todayKey = toDateKey(new Date());
   const history = entries
     .slice()
@@ -33,6 +37,7 @@ export const RecentHistory = ({ entries, isLoading }: RecentHistoryProps) => {
       subtitle: entry.completedAt
         ? `${format(new Date(entry.completedAt), "h:mm a")} • ${entry.value} logged`
         : "Not started",
+      note: entry.note?.trim() ?? "",
       status: entry.value > 0 ? "Done" : "Missed",
       type: entry.value > 0 ? "done" : "missed",
     }));
@@ -47,12 +52,17 @@ export const RecentHistory = ({ entries, isLoading }: RecentHistoryProps) => {
         )}
         {item.type === "missed" && (
           <View className="size-10 items-center justify-center rounded-full bg-muted">
-            <Minus size={18} className="text-muted-foreground" />
+            <Minus size={18} color={mutedForeground} />
           </View>
         )}
         <View>
           <Text className="text-lg font-bold text-foreground">{item.date}</Text>
           <Text className="text-muted-foreground">{item.subtitle}</Text>
+          {item.note ? (
+            <Text numberOfLines={2} className="mt-1 text-xs text-muted-foreground">
+              {item.note}
+            </Text>
+          ) : null}
         </View>
       </View>
       <View
@@ -82,7 +92,7 @@ export const RecentHistory = ({ entries, isLoading }: RecentHistoryProps) => {
         </View>
         {isLoading ? (
           <View className="px-4 py-6 flex-row items-center gap-2">
-            <Hourglass size={18} className="text-muted-foreground" />
+            <Hourglass size={18} color={mutedForeground} />
             <Text className="text-muted-foreground">Loading history...</Text>
           </View>
         ) : (
@@ -117,12 +127,12 @@ export const RecentHistory = ({ entries, isLoading }: RecentHistoryProps) => {
               onPress={() => setModalVisible(false)}
               className="size-8 items-center justify-center rounded-full bg-muted"
             >
-              <X size={18} className="text-foreground" />
+              <X size={18} color={foreground} />
             </Pressable>
           </View>
           {isLoading ? (
             <View className="px-4 py-6 flex-row items-center gap-2">
-              <Hourglass size={18} className="text-muted-foreground" />
+              <Hourglass size={18} color={mutedForeground} />
               <Text className="text-muted-foreground">Loading history...</Text>
             </View>
           ) : (

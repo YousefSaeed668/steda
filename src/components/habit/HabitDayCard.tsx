@@ -8,7 +8,7 @@ import {
 } from "@/lib/habit";
 import type { WeekStartsOn } from "@/lib/week";
 import { useAppThemeColor } from "@/theme/app-theme";
-import { Check, Rocket, Minus } from "lucide-react-native";
+import { Check, Pencil, Rocket, Minus } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
 export type HabitDayCardData = HabitLike & {
@@ -27,6 +27,7 @@ export type HabitDayCardProps = {
   date: Date;
   weekStartsOn: WeekStartsOn;
   onPress?: () => void;
+  onNotePress?: () => void;
   onToggle?: (completed: boolean) => void;
   isUpdating?: boolean;
   appearance?: "default" | "history";
@@ -37,6 +38,7 @@ export function HabitDayCard({
   date,
   weekStartsOn,
   onPress,
+  onNotePress,
   onToggle,
   isUpdating = false,
   appearance = "default",
@@ -52,6 +54,7 @@ export function HabitDayCard({
   const reminder = habit.reminders.find((item) => item.enabled);
   const detail = getDetailLabel(habit, reminder);
   const streak = getCurrentStreak(habit, date, weekStartsOn);
+  const note = entry?.note?.trim();
 
   const nameColor = isHistory
     ? completed
@@ -96,26 +99,49 @@ export function HabitDayCard({
             {habit.description}
           </Text>
         ) : null}
+        {note ? (
+          <Text numberOfLines={1} className="mt-1 text-xs text-muted-foreground">
+            {note}
+          </Text>
+        ) : null}
       </View>
 
-      {onToggle ? (
-        <Pressable
-          onPress={(event) => {
-            event.stopPropagation();
-            onToggle(!completed);
-          }}
-          disabled={isUpdating}
-          accessibilityRole="checkbox"
-          accessibilityState={{ checked: completed, disabled: isUpdating }}
-          accessibilityLabel={`${completed ? "Uncomplete" : "Complete"} ${habit.name}`}
-          className={`ml-3 h-9 w-9 items-center justify-center rounded-full ${indicatorColor}`}
-        >
-          {completed ? (
-            <Check size={20} color={card} strokeWidth={3} />
-          ) : isHistory ? (
-            <Minus size={19} color={mutedForeground} strokeWidth={2.5} />
+      {onToggle || onNotePress ? (
+        <View className="ml-3 gap-2">
+          {onNotePress ? (
+            <Pressable
+              onPress={(event) => {
+                event.stopPropagation();
+                onNotePress();
+              }}
+              disabled={isUpdating}
+              accessibilityRole="button"
+              accessibilityLabel={`${note ? "Edit" : "Add"} note for ${habit.name}`}
+              className={`h-9 w-9 items-center justify-center rounded-full ${note ? "bg-primary/10" : "bg-muted"}`}
+            >
+              <Pencil size={17} color={note ? primary : mutedForeground} />
+            </Pressable>
           ) : null}
-        </Pressable>
+          {onToggle ? (
+            <Pressable
+              onPress={(event) => {
+                event.stopPropagation();
+                onToggle(!completed);
+              }}
+              disabled={isUpdating}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: completed, disabled: isUpdating }}
+              accessibilityLabel={`${completed ? "Uncomplete" : "Complete"} ${habit.name}`}
+              className={`h-9 w-9 items-center justify-center rounded-full ${indicatorColor}`}
+            >
+              {completed ? (
+                <Check size={20} color={card} strokeWidth={3} />
+              ) : isHistory ? (
+                <Minus size={19} color={mutedForeground} strokeWidth={2.5} />
+              ) : null}
+            </Pressable>
+          ) : null}
+        </View>
       ) : (
         <View
           className={`ml-3 h-9 w-9 items-center justify-center rounded-full ${indicatorColor}`}

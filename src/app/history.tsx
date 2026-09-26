@@ -1,5 +1,6 @@
 import { HabitDayCard } from "@/components/habit/HabitDayCard";
 import { HistoryCalendar } from "@/components/history/HistoryCalendar";
+import { HabitNoteModal } from "@/components/history/HabitNoteModal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import SafeAreaScreen from "@/components/ui/safe-area-screen";
@@ -41,7 +42,16 @@ const History = () => {
     selectYear,
     toggleHabit,
     isUpdating,
+    noteHabitId,
+    noteDraft,
+    setNoteDraft,
+    openNoteEditor,
+    closeNoteEditor,
+    saveNote,
+    isSavingNote,
   } = useHistoryScreen();
+
+  const noteHabit = scheduledHabits.find((item) => item.id === noteHabitId);
 
   const selectedDayCompletion = selectedDay.scheduledCount
     ? Math.round(selectedDay.completionRatio * 100)
@@ -152,6 +162,7 @@ const History = () => {
               date={selectedDate}
               weekStartsOn={weekStartsOn}
                 appearance="history"
+                onNotePress={isEditing ? () => openNoteEditor(item.id) : undefined}
                 onToggle={
                   isEditing
                     ? (completed) => toggleHabit(item.id, completed)
@@ -175,6 +186,15 @@ const History = () => {
           />
         </View>
       </ScrollView>
+      <HabitNoteModal
+        visible={Boolean(noteHabit)}
+        habitName={noteHabit?.name ?? "Habit"}
+        note={noteDraft}
+        pending={isSavingNote}
+        onChangeNote={setNoteDraft}
+        onClose={closeNoteEditor}
+        onSave={saveNote}
+      />
     </SafeAreaScreen>
   );
 };

@@ -88,6 +88,8 @@ export function useHistoryScreen() {
   const [visibleMonth, setVisibleMonth] = useState(startOfMonth(today));
   const [isEditing, setIsEditing] = useState(false);
   const [isYearPickerVisible, setIsYearPickerVisible] = useState(false);
+  const [noteHabitId, setNoteHabitId] = useState<string | null>(null);
+  const [noteDraft, setNoteDraft] = useState("");
   const selectedDateKey = toDateKey(selectedDate);
 
   const historyQuery = useQuery({
@@ -138,6 +140,44 @@ export function useHistoryScreen() {
     },
     onError: () =>
       Alert.alert("Error", "Could not update this day log. Please try again."),
+  });
+
+  const noteMutation = useMutation({
+    mutationFn: async ({ habitId, note }: { habitId: string; note: string }) => {
+      const existingEntry = await db.query.habitEntry.findFirst({
+        where: and(
+          eq(habitEntry.habitId, habitId),
+          eq(habitEntry.dateKey, selectedDateKey),
+        ),
+      });
+      const nextNote = note.trim() || null;
+
+      if (existingEntry) {
+        await db
+          .update(habitEntry)
+          .set({ note: nextNote })
+          .where(eq(habitEntry.id, existingEntry.id));
+        return;
+      }
+
+      if (nextNote) {
+        await db.insert(habitEntry).values({
+          habitId,
+          dateKey: selectedDateKey,
+          note: nextNote,
+          value: 0,
+        });
+      }
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["history"] });
+      await queryClient.invalidateQueries({ queryKey: ["today"] });
+      await queryClient.invalidateQueries({ queryKey: ["habit"] });
+      await queryClient.invalidateQueries({ queryKey: ["habits"] });
+      setNoteHabitId(null);
+      setNoteDraft("");
+    },
+    onError: () => Alert.alert("Error", "Could not save this note. Please try again."),
   });
 
   const habits = historyQuery.data?.habits ?? [];
@@ -240,6 +280,27 @@ export function useHistoryScreen() {
     editDayMutation.mutate({ habitId, completed });
   }
 
+  function openNoteEditor(habitId: string) {
+    const habitItem = habits.find((item) => item.id === habitId);
+    const existingNote = habitItem?.entries.find(
+      (entry) => entry.dateKey === selectedDateKey,
+    )?.note;
+
+    setNoteHabitId(habitId);
+    setNoteDraft(existingNote ?? "");
+  }
+
+  function closeNoteEditor() {
+    if (noteMutation.isPending) return;
+    setNoteHabitId(null);
+    setNoteDraft("");
+  }
+
+  function saveNote() {
+    if (!noteHabitId) return;
+    noteMutation.mutate({ habitId: noteHabitId, note: noteDraft });
+  }
+
   return {
     today,
     selectedDate,
@@ -260,6 +321,13 @@ export function useHistoryScreen() {
     changeMonth,
     selectYear,
     toggleHabit,
-    isUpdating: editDayMutation.isPending,
+    isUpdating: editDayMutation.isPending || noteMutation.isPending,
+    noteHabitId,
+    noteDraft,
+    setNoteDraft,
+    openNoteEditor,
+    closeNoteEditor,
+    saveNote,
+    isSavingNote: noteMutation.isPending,
   };
 }

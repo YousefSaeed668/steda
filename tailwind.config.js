@@ -76,6 +76,7 @@ module.exports = {
       },
 
       fontFamily: {
+        sans: ["Inter_400Regular"],
         inter: ["Inter_400Regular"],
         "inter-medium": ["Inter_500Medium"],
         "inter-semibold": ["Inter_600SemiBold"],

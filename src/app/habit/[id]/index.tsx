@@ -240,7 +240,7 @@ const Index = () => {
               <View className="flex-row gap-2 items-center">
                 <Clock color={primary} />
 
-                <Text className="text-2xl font-medium">Today's Session</Text>
+                <Text className="text-2xl font-medium text-foreground">Today's Session</Text>
               </View>
 
               <View className="py-1 px-2 bg-muted rounded-xl">

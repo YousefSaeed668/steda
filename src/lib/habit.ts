@@ -13,7 +13,7 @@ import {
 import { sortWeekdaysByWeekStart, type WeekStartsOn } from "@/lib/week";
 
 type ScheduleDay = { weekday: number };
-type Entry = { dateKey: string; value: number };
+type Entry = { dateKey: string; value: number; note?: string | null };
 
 export type HabitLike = {
   frequency: HabitFrequency;

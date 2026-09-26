@@ -47,7 +47,7 @@ export const CadenceCard = ({
       {frequency === "SPECIFIC_DAYS" ? (
         <>
           <View className="my-4 flex-row justify-between">
-            <Text className="font-semibold">Selected Days</Text>
+            <Text className="font-semibold text-foreground">Selected Days</Text>
             <Text className="text-primary font-semibold">
               {scheduleDays.length} days active
             </Text>

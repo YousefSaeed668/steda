@@ -1,5 +1,6 @@
 import { Switch } from "@/components/ui/switch";
 import { TimeField } from "@/components/ui/time";
+import { useAppThemeColor } from "@/theme/app-theme";
 import { Moon } from "lucide-react-native";
 import { Modal, Pressable, Text, View } from "react-native";
 
@@ -16,7 +17,10 @@ type QuietHoursModalProps = {
   onSave: () => void;
 };
 
-export const QuietHoursModal = ({ visible, pending, enabled, startMinutes, endMinutes, onClose, onEnabledChange, onStartChange, onEndChange, onSave }: QuietHoursModalProps) => (
+export const QuietHoursModal = ({ visible, pending, enabled, startMinutes, endMinutes, onClose, onEnabledChange, onStartChange, onEndChange, onSave }: QuietHoursModalProps) => {
+  const mutedForeground = useAppThemeColor("mutedForeground");
+
+  return (
   <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
     <View className="flex-1 justify-end bg-black/40">
       <View className="rounded-t-3xl bg-background px-5 pb-8 pt-5">
@@ -32,11 +36,11 @@ export const QuietHoursModal = ({ visible, pending, enabled, startMinutes, endMi
           <Switch value={enabled} onChange={onEnabledChange} accessibilityLabel="Enable quiet hours" />
         </View>
         <View className="mb-4 flex-row items-center justify-between rounded-xl bg-muted px-4 py-3">
-          <View className="flex-row items-center gap-2"><Moon size={18} /><Text className="font-semibold text-foreground">Start Time</Text></View>
+          <View className="flex-row items-center gap-2"><Moon size={18} color={mutedForeground} /><Text className="font-semibold text-foreground">Start Time</Text></View>
           <TimeField value={startMinutes} onChange={onStartChange} />
         </View>
         <View className="mb-6 flex-row items-center justify-between rounded-xl bg-muted px-4 py-3">
-          <View className="flex-row items-center gap-2"><Moon size={18} /><Text className="font-semibold text-foreground">End Time</Text></View>
+          <View className="flex-row items-center gap-2"><Moon size={18} color={mutedForeground} /><Text className="font-semibold text-foreground">End Time</Text></View>
           <TimeField value={endMinutes} onChange={onEndChange} />
         </View>
         <Pressable onPress={onSave} disabled={pending} className="items-center rounded-xl bg-primary py-4">
@@ -45,4 +49,5 @@ export const QuietHoursModal = ({ visible, pending, enabled, startMinutes, endMi
       </View>
     </View>
   </Modal>
-);
+  );
+};

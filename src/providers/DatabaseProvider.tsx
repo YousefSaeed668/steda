@@ -25,8 +25,8 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
           alignItems: "center",
         }}
       >
-        <Text>Failed to initialize database.</Text>
-        <Text>{error.message}</Text>
+        <Text className="text-foreground">Failed to initialize database.</Text>
+        <Text className="text-muted-foreground">{error.message}</Text>
       </View>
     );
   }

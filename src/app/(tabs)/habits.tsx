@@ -178,7 +178,7 @@ const Habits = () => {
           </Text>
         </View>
 
-        <Text>{overview.maintainedRate}%</Text>
+        <Text className="text-foreground">{overview.maintainedRate}%</Text>
       </Card>
     </View>
   );

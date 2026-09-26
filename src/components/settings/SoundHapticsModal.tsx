@@ -26,8 +26,8 @@ export const SoundHapticsModal = ({ visible, soundEnabled, hapticsEnabled, custo
           <Text className="text-xl font-bold text-foreground">Sound & Haptics</Text>
           <Pressable onPress={onClose}><Text className="font-semibold text-primary">Close</Text></Pressable>
         </View>
-        <SoundToggle title="Sound" subtitle="Play reminder sounds" value={soundEnabled} onChange={onSoundChange} />
-        <SoundToggle title="Haptics" subtitle="Vibrate when feedback is triggered" value={hapticsEnabled} onChange={onHapticsChange} />
+        <SoundToggle title="Sound" subtitle="Play reminder sounds" value={soundEnabled} mutedForeground={mutedForeground} onChange={onSoundChange} />
+        <SoundToggle title="Haptics" subtitle="Vibrate when feedback is triggered" value={hapticsEnabled} mutedForeground={mutedForeground} onChange={onHapticsChange} />
         <Text className="mb-3 mt-5 text-xs font-bold uppercase tracking-wider text-muted-foreground">Choose Sound</Text>
         {bundledSounds.map((sound) => {
           const selected = customSoundUri === `bundled:${sound.id}`;
@@ -53,9 +53,9 @@ export const SoundHapticsModal = ({ visible, soundEnabled, hapticsEnabled, custo
   </Modal>
 );
 
-const SoundToggle = ({ title, subtitle, value, onChange }: { title: string; subtitle: string; value: boolean; onChange: (value: boolean) => void }) => (
+const SoundToggle = ({ title, subtitle, value, mutedForeground, onChange }: { title: string; subtitle: string; value: boolean; mutedForeground: string; onChange: (value: boolean) => void }) => (
   <View className="min-h-[68px] flex-row items-center px-4">
-    <View className="mr-3 size-9 items-center justify-center rounded-xl bg-muted"><Volume2 size={18} /></View>
+    <View className="mr-3 size-9 items-center justify-center rounded-xl bg-muted"><Volume2 size={18} color={mutedForeground} /></View>
     <View className="flex-1"><Text className="text-[15px] font-semibold text-foreground">{title}</Text><Text className="mt-0.5 text-xs text-muted-foreground">{subtitle}</Text></View>
     <Switch value={value} onChange={onChange} accessibilityLabel={title} />
   </View>

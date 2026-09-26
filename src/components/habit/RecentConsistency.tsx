@@ -1,4 +1,5 @@
 import { HabitLike, isHabitScheduledOn, toDateKey } from "@/lib/habit";
+import { useAppThemeColor } from "@/theme/app-theme";
 import { format, isFuture, isToday, subDays } from "date-fns";
 import { Check, Minus } from "lucide-react-native";
 import { Text, View } from "react-native";
@@ -21,6 +22,7 @@ export const RecentConsistency = ({
   habit,
   today = new Date(),
 }: RecentConsistencyProps) => {
+  const mutedForeground = useAppThemeColor("mutedForeground");
   const entryMap = new Map(
     habit.entries.map((entry) => [entry.dateKey, entry.value]),
   );
@@ -92,7 +94,7 @@ export const RecentConsistency = ({
         )}
         {item.status === "not-scheduled" && (
           <View className="size-5 items-center justify-center rounded-full bg-muted">
-            <Minus size={12} className="text-muted-foreground" />
+            <Minus size={12} color={mutedForeground} />
           </View>
         )}
       </Card>

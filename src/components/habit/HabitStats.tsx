@@ -19,6 +19,7 @@ export const HabitStats = ({
   requiredSessions,
 }: HabitStatsProps) => {
   const warning = useAppThemeColor("warning");
+  const mutedForeground = useAppThemeColor("mutedForeground");
   const goalLabel = monthlyRate >= 80 ? "Above personal goal" : "Below personal goal";
 
   return (
@@ -29,7 +30,7 @@ export const HabitStats = ({
             <Text className="mb-3 font-semibold uppercase tracking-wider text-muted-foreground">
               MONTHLY RATE
             </Text>
-            <PieChart size={18} className="text-muted-foreground" />
+            <PieChart size={18} color={mutedForeground} />
           </View>
           <Text className="text-2xl font-bold text-foreground mb-1">{monthlyRate}%</Text>
           <Text className={`font-medium ${monthlyRate >= 80 ? "text-success" : "text-muted-foreground"}`}>
@@ -55,7 +56,7 @@ export const HabitStats = ({
             <Text className="mb-3 font-semibold uppercase tracking-wider text-muted-foreground">
               BEST STREAK
             </Text>
-            <Trophy size={18} className="text-muted-foreground" />
+            <Trophy size={18} color={mutedForeground} />
           </View>
           <Text className="text-2xl font-bold text-foreground mb-1">
             {bestStreak} days
@@ -67,7 +68,7 @@ export const HabitStats = ({
             <Text className="mb-3 font-semibold uppercase tracking-wider text-muted-foreground">
               TOTAL SESSIONS
             </Text>
-            <CheckCircle2 size={18} className="text-muted-foreground" />
+            <CheckCircle2 size={18} color={mutedForeground} />
           </View>
           <Text className="text-2xl font-bold text-foreground mb-1">
             {completedSessions} / {requiredSessions}

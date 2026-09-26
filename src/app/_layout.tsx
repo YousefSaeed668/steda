@@ -1,5 +1,13 @@
 import { DatabaseProvider } from "@/providers/DatabaseProvider";
+import { TypographyProvider } from "@/providers/TypographyProvider";
 import { appThemeColors, appThemes } from "@/theme/app-theme";
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from "@expo-google-fonts/inter";
+import { useFonts } from "expo-font";
 import {
   QueryClient,
   QueryClientProvider,
@@ -54,32 +62,44 @@ function ReminderNotificationObserver() {
 
 export default function RootLayout() {
   const { colorScheme } = useColorScheme();
+  const [fontsLoaded, fontError] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
   const [queryClient] = useState(() => new QueryClient());
 
   const scheme = colorScheme ?? "light";
 
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
   return (
-    <DatabaseProvider>
-      <QueryClientProvider client={queryClient}>
-        <ReminderNotificationObserver />
-        <View
-          style={[
-            appThemes[scheme],
-            {
-              backgroundColor: appThemeColors[scheme].background,
-              flex: 1,
-            },
-          ]}
-        >
-          <Stack
-            screenOptions={{
-              headerShown: false,
-            }}
-          >
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          </Stack>
-        </View>
-      </QueryClientProvider>
-    </DatabaseProvider>
+    <QueryClientProvider client={queryClient}>
+      <View
+        style={[
+          appThemes[scheme],
+          {
+            backgroundColor: appThemeColors[scheme].background,
+            flex: 1,
+          },
+        ]}
+      >
+        <TypographyProvider>
+          <DatabaseProvider>
+            <ReminderNotificationObserver />
+            <Stack
+              screenOptions={{
+                headerShown: false,
+              }}
+            >
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            </Stack>
+          </DatabaseProvider>
+        </TypographyProvider>
+      </View>
+    </QueryClientProvider>
   );
 }

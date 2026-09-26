@@ -13,7 +13,7 @@ export const HabitDetailsCard = ({
 }) => {
   return (
     <Card>
-      <Text className="mb-2">Habit Name</Text>
+      <Text className="mb-2 text-foreground">Habit Name</Text>
       <Controller
         control={control}
         name="name"
@@ -34,7 +34,7 @@ export const HabitDetailsCard = ({
           {errors.name.message}
         </Text>
       )}
-      <Text className="my-2">Description</Text>
+      <Text className="my-2 text-foreground">Description</Text>
 
       <Controller
         control={control}
@@ -61,7 +61,7 @@ export const HabitDetailsCard = ({
           {errors.description.message}
         </Text>
       )}
-      <Text className="my-2">Icon & Tone</Text>
+      <Text className="my-2 text-foreground">Icon & Tone</Text>
       <IconColorPicker control={control} />
     </Card>
   );
