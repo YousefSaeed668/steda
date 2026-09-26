@@ -13,9 +13,7 @@
     },
     "android": {
       "package": "com.yousef.steda",
-      "permissions": [
-        "SCHEDULE_EXACT_ALARM"
-      ],
+      "permissions": ["SCHEDULE_EXACT_ALARM"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png",
@@ -33,12 +31,12 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-logo.png",
-          "imageWidth": 190,
+          "imageWidth": 240,
           "resizeMode": "contain",
-          "backgroundColor": "#F7F8FC",
+          "backgroundColor": "#FFFFFF",
           "dark": {
             "image": "./assets/images/splash-logo.png",
-            "backgroundColor": "#121522"
+            "backgroundColor": "#F5F6F8"
           }
         }
       ],
