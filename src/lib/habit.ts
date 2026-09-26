@@ -16,6 +16,8 @@ type ScheduleDay = { weekday: number };
 type Entry = { dateKey: string; value: number; note?: string | null };
 
 export type HabitLike = {
+  archivedAt?: Date | null;
+  createdAt?: Date;
   frequency: HabitFrequency;
   timesPerWeek: number | null;
   scheduleDays: ScheduleDay[];
@@ -43,9 +45,48 @@ export function isHabitScheduledOn(habit: HabitLike, date: Date) {
   return true;
 }
 
+export function isHabitActiveOnDate(habit: HabitLike, date: Date) {
+  const dateKey = toDateKey(date);
+
+  return (
+    (!habit.createdAt || toDateKey(habit.createdAt) <= dateKey) &&
+    (!habit.archivedAt || toDateKey(habit.archivedAt) >= dateKey)
+  );
+}
+
+function getEffectiveWeeklyTarget(
+  habit: HabitLike,
+  start: Date,
+  end: Date,
+) {
+  const target = habit.timesPerWeek ?? 0;
+  if (target <= 0) return 0;
+
+  let activeDays = 0;
+  let cursor = start;
+  while (!isBefore(end, cursor)) {
+    if (isHabitActiveOnDate(habit, cursor)) activeDays += 1;
+    cursor = addDays(cursor, 1);
+  }
+
+  return Math.min(target, activeDays);
+}
+
+function getCompletedCountInRange(habit: HabitLike, start: Date, end: Date) {
+  const startKey = toDateKey(start);
+  const endKey = toDateKey(end);
+
+  return habit.entries.filter(
+    (entry) =>
+      entry.value > 0 &&
+      entry.dateKey >= startKey &&
+      entry.dateKey <= endKey,
+  ).length;
+}
+
 export function getCompletionRatioForDate(habits: HabitLike[], date: Date) {
   const scheduledHabits = habits.filter((habit) =>
-    isHabitScheduledOn(habit, date),
+    isHabitActiveOnDate(habit, date) && isHabitScheduledOn(habit, date),
   );
 
   if (scheduledHabits.length === 0) return 0;
@@ -105,14 +146,17 @@ export function getWeeklyRequiredCount(
   weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6,
   today: Date,
 ) {
-  if (habit.frequency === "TIMES_PER_WEEK") {
-    return habit.timesPerWeek ?? 0;
-  }
   const weekStart = startOfWeek(today, { weekStartsOn });
+
+  if (habit.frequency === "TIMES_PER_WEEK") {
+    return getEffectiveWeeklyTarget(habit, weekStart, today);
+  }
   let required = 0;
   let cursor = weekStart;
   while (!isBefore(today, cursor)) {
-    if (isHabitScheduledOn(habit, cursor)) required += 1;
+    if (isHabitActiveOnDate(habit, cursor) && isHabitScheduledOn(habit, cursor)) {
+      required += 1;
+    }
     cursor = addDays(cursor, 1);
   }
   return required;
@@ -124,11 +168,22 @@ export function getWeeklyCompletedCount(
   today: Date,
 ) {
   const weekStart = startOfWeek(today, { weekStartsOn });
+  if (habit.frequency === "TIMES_PER_WEEK") {
+    const target = getEffectiveWeeklyTarget(habit, weekStart, today);
+    return Math.min(getCompletedCountInRange(habit, weekStart, today), target);
+  }
+
   const map = buildEntryMap(habit.entries);
   let completed = 0;
   let cursor = weekStart;
   while (!isBefore(today, cursor)) {
-    if ((map.get(toDateKey(cursor)) ?? 0) > 0) completed += 1;
+    if (
+      isHabitActiveOnDate(habit, cursor) &&
+      isHabitScheduledOn(habit, cursor) &&
+      (map.get(toDateKey(cursor)) ?? 0) > 0
+    ) {
+      completed += 1;
+    }
     cursor = addDays(cursor, 1);
   }
   return completed;
@@ -142,20 +197,28 @@ export function getMonthlyCompletionRate(
   const monthStart = startOfMonth(today);
 
   if (habit.frequency === "TIMES_PER_WEEK") {
-    let weeksElapsed = 0;
     let weekStart = startOfWeek(monthStart, { weekStartsOn });
+    let required = 0;
+    let completed = 0;
+
     while (!isBefore(today, weekStart)) {
-      weeksElapsed += 1;
+      const rangeStart = isBefore(weekStart, monthStart)
+        ? monthStart
+        : weekStart;
+      const rangeEnd = isBefore(today, addDays(weekStart, 6))
+        ? today
+        : addDays(weekStart, 6);
+      const target = getEffectiveWeeklyTarget(habit, rangeStart, rangeEnd);
+
+      required += target;
+      completed += Math.min(
+        getCompletedCountInRange(habit, rangeStart, rangeEnd),
+        target,
+      );
       weekStart = addDays(weekStart, 7);
     }
-    const required = (habit.timesPerWeek ?? 0) * weeksElapsed;
+
     if (required === 0) return 0;
-    const completed = habit.entries.filter(
-      (entry) =>
-        entry.value > 0 &&
-        entry.dateKey >= toDateKey(monthStart) &&
-        entry.dateKey <= toDateKey(today),
-    ).length;
     return Math.min(100, Math.round((completed / required) * 100));
   }
 
@@ -164,7 +227,7 @@ export function getMonthlyCompletionRate(
   let completed = 0;
   let cursor = monthStart;
   while (!isBefore(today, cursor)) {
-    if (isHabitScheduledOn(habit, cursor)) {
+    if (isHabitActiveOnDate(habit, cursor) && isHabitScheduledOn(habit, cursor)) {
       required += 1;
       if ((map.get(toDateKey(cursor)) ?? 0) > 0) completed += 1;
     }
@@ -180,21 +243,26 @@ export function getCurrentStreak(
   weekStartsOn: WeekStartsOn = 1,
 ) {
   if (habit.frequency === "TIMES_PER_WEEK") {
-    const target = habit.timesPerWeek ?? 0;
-    if (target === 0) return 0;
-
     let streak = 0;
     let weekStart = startOfWeek(today, { weekStartsOn });
     let isCurrentWeek = true;
 
     while (streak <= 520) {
       const rangeEnd = isCurrentWeek ? today : addDays(weekStart, 6);
-      const completed = habit.entries.filter(
-        (entry) =>
-          entry.value > 0 &&
-          entry.dateKey >= toDateKey(weekStart) &&
-          entry.dateKey <= toDateKey(rangeEnd),
-      ).length;
+      const target = getEffectiveWeeklyTarget(habit, weekStart, rangeEnd);
+      const completed = Math.min(
+        getCompletedCountInRange(habit, weekStart, rangeEnd),
+        target,
+      );
+
+      if (target === 0) {
+        if (isCurrentWeek) {
+          isCurrentWeek = false;
+          weekStart = subWeeks(weekStart, 1);
+          continue;
+        }
+        break;
+      }
 
       if (completed < target) {
         if (isCurrentWeek) {
@@ -219,7 +287,14 @@ export function getCurrentStreak(
   let daysWalked = 0;
 
   while (daysWalked < 3650) {
-    if (isHabitScheduledOn(habit, cursor)) {
+    if (
+      habit.createdAt &&
+      toDateKey(cursor) < toDateKey(habit.createdAt)
+    ) {
+      break;
+    }
+
+    if (isHabitActiveOnDate(habit, cursor) && isHabitScheduledOn(habit, cursor)) {
       const done = (map.get(toDateKey(cursor)) ?? 0) > 0;
       if (!done) {
         if (toDateKey(cursor) === toDateKey(today)) {
@@ -252,7 +327,10 @@ export function getStreakDots(
     let cursor = today;
     let daysWalked = 0;
     while (dots.length < weekdays.length && daysWalked < 365) {
-      if (weekdays.includes(cursor.getDay())) {
+      if (
+        weekdays.includes(cursor.getDay()) &&
+        isHabitActiveOnDate(habit, cursor)
+      ) {
         dots.unshift((map.get(toDateKey(cursor)) ?? 0) > 0);
       }
       cursor = subDays(cursor, 1);
@@ -262,21 +340,19 @@ export function getStreakDots(
   }
 
   if (habit.frequency === "TIMES_PER_WEEK") {
-    const target = habit.timesPerWeek ?? 0;
     const weekStart = startOfWeek(today, { weekStartsOn });
-    const completed = habit.entries.filter(
-      (entry) =>
-        entry.value > 0 &&
-        entry.dateKey >= toDateKey(weekStart) &&
-        entry.dateKey <= toDateKey(today),
-    ).length;
+    const target = getEffectiveWeeklyTarget(habit, weekStart, today);
+    const completed = getCompletedCountInRange(habit, weekStart, today);
     return Array.from({ length: target }, (_, index) => index < completed);
   }
 
   const dots: boolean[] = [];
   for (let i = 6; i >= 0; i -= 1) {
     const date = subDays(today, i);
-    dots.push((map.get(toDateKey(date)) ?? 0) > 0);
+    dots.push(
+      isHabitActiveOnDate(habit, date) &&
+        (map.get(toDateKey(date)) ?? 0) > 0,
+    );
   }
   return dots;
 }

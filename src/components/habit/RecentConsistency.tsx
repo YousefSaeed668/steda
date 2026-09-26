@@ -1,4 +1,9 @@
-import { HabitLike, isHabitScheduledOn, toDateKey } from "@/lib/habit";
+import {
+  HabitLike,
+  isHabitActiveOnDate,
+  isHabitScheduledOn,
+  toDateKey,
+} from "@/lib/habit";
 import { useAppThemeColor } from "@/theme/app-theme";
 import { format, isFuture, isToday, subDays } from "date-fns";
 import { Check, Minus } from "lucide-react-native";
@@ -28,7 +33,8 @@ export const RecentConsistency = ({
   );
   const days: ConsistencyDay[] = Array.from({ length: 14 }, (_, index) => {
     const date = subDays(today, 13 - index);
-    const scheduled = isHabitScheduledOn(habit, date);
+    const scheduled =
+      isHabitActiveOnDate(habit, date) && isHabitScheduledOn(habit, date);
     const completed = (entryMap.get(toDateKey(date)) ?? 0) > 0;
 
     return {

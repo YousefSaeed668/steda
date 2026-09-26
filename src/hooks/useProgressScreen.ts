@@ -114,13 +114,14 @@ function summarizePeriod(
         );
         if (!activeDates.length) continue;
 
-        scheduledCount += weeklyTarget;
+        const effectiveTarget = Math.min(weeklyTarget, activeDates.length);
+        scheduledCount += effectiveTarget;
         const activeDateKeys = new Set(activeDates.map(toDateKey));
         const actualCompletions = item.entries.filter(
           (entry) =>
             activeDateKeys.has(entry.dateKey) && entry.value > 0,
         ).length;
-        completedCount += Math.min(actualCompletions, weeklyTarget);
+        completedCount += Math.min(actualCompletions, effectiveTarget);
       }
       continue;
     }

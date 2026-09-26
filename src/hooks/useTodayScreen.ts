@@ -1,9 +1,14 @@
 import { db } from "@/db/client";
 import { appSettings, habit, habitEntry } from "@/db/schema";
-import { getCurrentStreak, isHabitScheduledOn, toDateKey } from "@/lib/habit";
+import {
+  getCurrentStreak,
+  isHabitActiveOnDate,
+  isHabitScheduledOn,
+  toDateKey,
+} from "@/lib/habit";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { startOfDay } from "date-fns";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { useMemo, useState } from "react";
 import { Alert } from "react-native";
 
@@ -26,7 +31,6 @@ export function useTodayScreen() {
     queryFn: async () => {
       const [habits, settings] = await Promise.all([
         db.query.habit.findMany({
-          where: isNull(habit.archivedAt),
           with: { scheduleDays: true, entries: true, reminders: true },
           orderBy: (fields, { asc }) => [
             asc(fields.position),
@@ -80,8 +84,14 @@ export function useTodayScreen() {
   const weekStartsOn = (todayQuery.data?.settings?.weekStartsOn ??
     1) as WeekStartsOn;
   const scheduledHabits = useMemo(
-    () => habits.filter((item) => isHabitScheduledOn(item, selectedDate)),
-    [habits, selectedDate],
+    () =>
+      habits.filter(
+        (item) =>
+          isHabitActiveOnDate(item, selectedDate) &&
+          (selectedDateKey !== toDateKey(today) || item.archivedAt == null) &&
+          isHabitScheduledOn(item, selectedDate),
+      ),
+    [habits, selectedDate, selectedDateKey, today],
   );
 
   const completedCount = scheduledHabits.filter((item) => {

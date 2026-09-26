@@ -30,6 +30,7 @@ import { addMinutes, format, startOfDay } from "date-fns";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { eq } from "drizzle-orm";
 import { useForm } from "react-hook-form";
+import { useRef } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -63,6 +64,7 @@ const EditHabitForm = ({
 }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const isSavingRef = useRef(false);
   const primary = useAppThemeColor("primary");
   const settingsQuery = useQuery({
     queryKey: ["app-settings"],
@@ -188,29 +190,34 @@ const EditHabitForm = ({
         });
       }
 
-      await syncScheduledHabitNotifications({
-        requestPermission: values.reminderEnabled,
-      });
     },
 
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["habit", habitData.id],
+    onSuccess: (_data, values) => {
+      void syncScheduledHabitNotifications({
+        requestPermission: values.reminderEnabled,
+      }).catch((error) => {
+        console.error("Failed to refresh habit reminders:", error);
       });
 
-      await queryClient.invalidateQueries({
-        queryKey: ["habits"],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["habit-edit", habitData.id],
-      });
+      void Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["today"] }),
+        queryClient.invalidateQueries({ queryKey: ["habits"] }),
+        queryClient.invalidateQueries({ queryKey: ["progress"] }),
+        queryClient.invalidateQueries({ queryKey: ["habit", habitData.id] }),
+        queryClient.invalidateQueries({
+          queryKey: ["habit-edit", habitData.id],
+        }),
+      ]);
 
       router.back();
     },
   });
 
   const onSubmit = async (values: CreateHabitInput) => {
+    if (isSavingRef.current) return;
+
+    isSavingRef.current = true;
+
     try {
       await updateMutation.mutateAsync(values);
     } catch {
@@ -218,6 +225,8 @@ const EditHabitForm = ({
         "Error",
         "Could not update habit. Please try again.",
       );
+    } finally {
+      isSavingRef.current = false;
     }
   };
 
@@ -239,6 +248,7 @@ const EditHabitForm = ({
             label: saving ? "Saving..." : "Save",
             onPress: handleSubmit(onSubmit),
             tone: "primary",
+            disabled: saving,
           }}
         />
 

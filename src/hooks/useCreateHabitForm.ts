@@ -14,11 +14,13 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { addMinutes, format, startOfDay } from "date-fns";
 import { useRouter } from "expo-router";
 import { useForm } from "react-hook-form";
+import { useRef } from "react";
 import { Alert } from "react-native";
 
 export function useCreateHabitForm() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const isCreatingRef = useRef(false);
   const settingsQuery = useQuery({
     queryKey: ["app-settings"],
     queryFn: getAppSettings,
@@ -80,6 +82,10 @@ export function useCreateHabitForm() {
   const summaryTitle = `${frequencyText}${reminderText}${goalText}`;
 
   async function onSubmit(values: CreateHabitInput) {
+    if (isCreatingRef.current) return;
+
+    isCreatingRef.current = true;
+
     try {
       let createdHabitId: string | undefined;
 
@@ -125,17 +131,24 @@ export function useCreateHabitForm() {
           timeMinutes: values.reminderTime,
         });
       }
-      await syncScheduledHabitNotifications({
+      void syncScheduledHabitNotifications({
         requestPermission: values.reminderEnabled,
+      }).catch((error) => {
+        console.error("Failed to refresh habit reminders:", error);
       });
-      await queryClient.invalidateQueries({
-        queryKey: ["habits"],
-      });
-      console.log("✅ Habit created successfully with ID:", createdHabitId);
+
+      void Promise.all(
+        ["today", "habits", "progress"].map((queryKey) =>
+          queryClient.invalidateQueries({ queryKey: [queryKey] }),
+        ),
+      );
+
       router.back();
     } catch (error) {
       console.error("❌ Failed to create habit:", error);
       Alert.alert("Error", "Could not save habit. Please try again.");
+    } finally {
+      isCreatingRef.current = false;
     }
   }
 

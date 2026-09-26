@@ -16,6 +16,7 @@ const CreateHabitScreen = () => {
   const {
     control,
     errors,
+    isSubmitting,
     handleSubmit,
     onSubmit,
     frequency,
@@ -37,9 +38,10 @@ const CreateHabitScreen = () => {
               "Are you sure you want to leave? Your new habit won't be saved.",
           }}
           rightAction={{
-            label: "Save",
+            label: isSubmitting ? "Saving..." : "Save",
             onPress: handleSubmit(onSubmit),
             tone: "primary",
+            disabled: isSubmitting,
           }}
         />
 
@@ -77,6 +79,8 @@ const CreateHabitScreen = () => {
         <Button
           label="Create Habit"
           onPress={handleSubmit(onSubmit)}
+          loading={isSubmitting}
+          disabled={isSubmitting}
           className="w-[80%] mx-auto"
         />
       </View>

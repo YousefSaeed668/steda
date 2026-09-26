@@ -123,10 +123,12 @@ export const useSettingsScreen = () => {
   const exportMutation = useMutation({ mutationFn: exportBackup });
   const importMutation = useMutation({
     mutationFn: importBackup,
-    onSuccess: async (imported) => {
+    onSuccess: (imported) => {
       if (imported) {
-        await syncScheduledHabitNotifications();
-        await queryClient.invalidateQueries();
+        void syncScheduledHabitNotifications().catch((error) => {
+          console.error("Failed to refresh habit reminders:", error);
+        });
+        void queryClient.invalidateQueries();
       }
     },
   });

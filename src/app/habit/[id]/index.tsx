@@ -10,8 +10,9 @@ import {
   CirclePause,
   CirclePlay,
   Clock,
+  Trash2,
 } from "lucide-react-native";
-import { ScrollView, Text, View } from "react-native";
+import { Alert, ScrollView, Text, View } from "react-native";
 
 import { HabitRow } from "@/components/habit/HabitRow";
 import { HabitStats } from "@/components/habit/HabitStats";
@@ -47,6 +48,7 @@ const Index = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const primary = useAppThemeColor("primary");
+  const destructive = useAppThemeColor("destructive");
   const mutedForeground = useAppThemeColor("mutedForeground");
 
   const today = startOfDay(new Date());
@@ -116,10 +118,40 @@ const Index = () => {
         completedAt: new Date(),
       });
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["habit", id],
+    onSuccess: () => {
+      void Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["today"] }),
+        queryClient.invalidateQueries({ queryKey: ["habits"] }),
+        queryClient.invalidateQueries({ queryKey: ["progress"] }),
+        queryClient.invalidateQueries({ queryKey: ["habit", id] }),
+      ]);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      if (!id) {
+        throw new Error("Habit id is required");
+      }
+
+      await db.delete(habit).where(eq(habit.id, id));
+    },
+    onSuccess: () => {
+      void syncScheduledHabitNotifications().catch((error) => {
+        console.error("Failed to refresh habit reminders:", error);
       });
+
+      void Promise.all(
+        ["today", "habits", "progress", "history", "habit"].map(
+          (queryKey) => queryClient.invalidateQueries({ queryKey: [queryKey] }),
+        ),
+      );
+
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace("/habits");
+      }
     },
   });
 
@@ -203,6 +235,8 @@ const Index = () => {
     : isArchived
       ? "Resume habit"
       : "Pause habit";
+  const isLifecycleUpdating =
+    archiveMutation.isPending || deleteMutation.isPending;
 
   const reminder = currentHabit.reminders[0];
 
@@ -334,10 +368,10 @@ const Index = () => {
 
           <Card
             className={`flex-row items-center justify-between py-4 px-2 ${
-              archiveMutation.isPending ? "opacity-50" : ""
+              isLifecycleUpdating ? "opacity-50" : ""
             }`}
             onPress={() => {
-              if (!archiveMutation.isPending) {
+              if (!isLifecycleUpdating) {
                 archiveMutation.mutate(!isArchived);
               }
             }}
@@ -355,6 +389,37 @@ const Index = () => {
             </View>
 
             <ChevronRight size={18} color={mutedForeground} />
+          </Card>
+
+          <Card
+            className={`mt-3 flex-row items-center justify-between border-destructive/30 bg-destructive/10 py-4 px-2 ${
+              isLifecycleUpdating ? "opacity-50" : ""
+            }`}
+            onPress={() => {
+              if (isLifecycleUpdating) return;
+
+              Alert.alert(
+                "Delete habit?",
+                `This will permanently remove ${currentHabit.name} and its history.`,
+                [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Delete habit",
+                    style: "destructive",
+                    onPress: () => deleteMutation.mutate(),
+                  },
+                ],
+              );
+            }}
+          >
+            <View className="flex-row items-center gap-2">
+              <Trash2 size={20} color={destructive} />
+              <Text className="text-lg font-medium text-destructive">
+                {deleteMutation.isPending ? "Deleting..." : "Delete habit"}
+              </Text>
+            </View>
+
+            <ChevronRight size={18} color={destructive} />
           </Card>
         </View>
       </ScrollView>
