@@ -249,7 +249,7 @@ export function useProgressScreen() {
         0,
         ...habits
           .filter((item) => isHabitActiveOnDate(item, today))
-          .map((item) => getCurrentStreak(item, today)),
+          .map((item) => getCurrentStreak(item, today, weekStartsOn)),
       ),
     [habits, today.getTime()],
   );

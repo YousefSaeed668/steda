@@ -148,8 +148,9 @@ const History = () => {
             {scheduledHabits.map((item) => (
               <HabitDayCard
                 key={item.id}
-                habit={item}
-                date={selectedDate}
+              habit={item}
+              date={selectedDate}
+              weekStartsOn={weekStartsOn}
                 appearance="history"
                 onToggle={
                   isEditing

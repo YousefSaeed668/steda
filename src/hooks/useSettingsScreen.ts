@@ -100,8 +100,16 @@ export const useSettingsScreen = () => {
           break;
       }
     },
-    onSuccess: async () => {
+    onSuccess: async (_, action) => {
       await queryClient.invalidateQueries({ queryKey: ["app-settings"] });
+
+      if (action.type === "week") {
+        await Promise.all(
+          ["today", "habits", "progress", "history", "habit"].map(
+            (queryKey) => queryClient.invalidateQueries({ queryKey: [queryKey] }),
+          ),
+        );
+      }
     },
   });
 

@@ -96,7 +96,8 @@ export function useTodayScreen() {
     : 0;
 
   const totalStreak = scheduledHabits.reduce(
-    (maximum, item) => Math.max(maximum, getCurrentStreak(item, selectedDate)),
+    (maximum, item) =>
+      Math.max(maximum, getCurrentStreak(item, selectedDate, weekStartsOn)),
     0,
   );
 

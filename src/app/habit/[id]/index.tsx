@@ -36,6 +36,8 @@ import {
 } from "@/lib/habit";
 import { useAppThemeColor } from "@/theme/app-theme";
 import { syncScheduledHabitNotifications } from "@/lib/notifications";
+import { getAppSettings } from "@/lib/settings";
+import type { WeekStartsOn } from "@/lib/week";
 
 const Index = () => {
   const router = useRouter();
@@ -67,6 +69,11 @@ const Index = () => {
 
       return result;
     },
+  });
+
+  const settingsQuery = useQuery({
+    queryKey: ["app-settings"],
+    queryFn: getAppSettings,
   });
 
   const completeMutation = useMutation({
@@ -156,20 +163,33 @@ const Index = () => {
   }
 
   const currentHabit = habitQuery.data;
+  const weekStartsOn = (settingsQuery.data?.weekStartsOn ?? 1) as WeekStartsOn;
 
   const isArchived = Boolean(currentHabit.archivedAt);
 
   const reminder = currentHabit.reminders[0];
 
-  const monthlyRate = getMonthlyCompletionRate(currentHabit, today);
+  const monthlyRate = getMonthlyCompletionRate(
+    currentHabit,
+    today,
+    weekStartsOn,
+  );
 
-  const currentStreak = getCurrentStreak(currentHabit, today);
+  const currentStreak = getCurrentStreak(currentHabit, today, weekStartsOn);
 
-  const weeklyCompleted = getWeeklyCompletedCount(currentHabit, 1, today);
+  const weeklyCompleted = getWeeklyCompletedCount(
+    currentHabit,
+    weekStartsOn,
+    today,
+  );
 
-  const weeklyRequired = getWeeklyRequiredCount(currentHabit, 1, today);
+  const weeklyRequired = getWeeklyRequiredCount(
+    currentHabit,
+    weekStartsOn,
+    today,
+  );
 
-  const frequencyLabel = getFrequencyLabel(currentHabit);
+  const frequencyLabel = getFrequencyLabel(currentHabit, weekStartsOn);
 
   const detailLabel = getDetailLabel(currentHabit, reminder);
 
@@ -208,7 +228,7 @@ const Index = () => {
               Icon={getHabitIcon(currentHabit.icon)}
               color={currentHabit.color ?? primary}
               streak={currentStreak}
-              dots={getStreakDots(currentHabit, today)}
+              dots={getStreakDots(currentHabit, today, weekStartsOn)}
               monthlyRate={monthlyRate}
               showStatusBadge
               isArchived={Boolean(currentHabit.archivedAt)}

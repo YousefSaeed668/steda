@@ -18,6 +18,8 @@ import {
 } from "@/schemas/create-habit";
 import { useAppThemeColor } from "@/theme/app-theme";
 import { syncScheduledHabitNotifications } from "@/lib/notifications";
+import { getAppSettings } from "@/lib/settings";
+import type { WeekStartsOn } from "@/lib/week";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   useMutation,
@@ -62,6 +64,11 @@ const EditHabitForm = ({
   const router = useRouter();
   const queryClient = useQueryClient();
   const primary = useAppThemeColor("primary");
+  const settingsQuery = useQuery({
+    queryKey: ["app-settings"],
+    queryFn: getAppSettings,
+  });
+  const weekStartsOn = (settingsQuery.data?.weekStartsOn ?? 1) as WeekStartsOn;
 
   const reminder = habitData.reminders.find(
     (item) => item.enabled,
@@ -254,6 +261,7 @@ const EditHabitForm = ({
             errors={errors}
             frequency={frequency}
             scheduleDays={scheduleDays}
+            weekStartsOn={weekStartsOn}
           />
 
           <Text className="uppercase tracking-wider mb-4 text-muted-foreground font-semibold">

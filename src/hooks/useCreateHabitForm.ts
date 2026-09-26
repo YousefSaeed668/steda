@@ -7,8 +7,10 @@ import {
 } from "@/db/schema";
 import { CreateHabitInput, createHabitSchema } from "@/schemas/create-habit";
 import { syncScheduledHabitNotifications } from "@/lib/notifications";
+import { getAppSettings } from "@/lib/settings";
+import type { WeekStartsOn } from "@/lib/week";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { addMinutes, format, startOfDay } from "date-fns";
 import { useRouter } from "expo-router";
 import { useForm } from "react-hook-form";
@@ -16,7 +18,12 @@ import { Alert } from "react-native";
 
 export function useCreateHabitForm() {
   const router = useRouter();
-const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
+  const settingsQuery = useQuery({
+    queryKey: ["app-settings"],
+    queryFn: getAppSettings,
+  });
+  const weekStartsOn = (settingsQuery.data?.weekStartsOn ?? 1) as WeekStartsOn;
   const {
     control,
     handleSubmit,
@@ -142,5 +149,6 @@ const queryClient = useQueryClient();
     scheduleDays,
     reminderEnabled,
     summaryTitle,
+    weekStartsOn,
   };
 }

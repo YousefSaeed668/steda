@@ -137,6 +137,7 @@ const TodayScreen = () => {
                 key={item.id}
                 habit={item}
                 date={selectedDate}
+                weekStartsOn={weekStartsOn}
                 onPress={() => router.push(`/habit/${item.id}`)}
                 onToggle={(completed) => onToggleHabit(item.id, completed)}
                 isUpdating={isUpdating}

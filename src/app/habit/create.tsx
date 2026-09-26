@@ -22,6 +22,7 @@ const CreateHabitScreen = () => {
     scheduleDays,
     reminderEnabled,
     summaryTitle,
+    weekStartsOn,
   } = useCreateHabitForm();
 
   return (
@@ -56,6 +57,7 @@ const CreateHabitScreen = () => {
             errors={errors}
             frequency={frequency}
             scheduleDays={scheduleDays}
+            weekStartsOn={weekStartsOn}
           />
 
           <Text className="uppercase tracking-wider mb-4 text-muted-foreground font-semibold">

@@ -2,7 +2,6 @@ import { HabitFrequency } from "@/db/schema";
 import {
   addDays,
   addMinutes,
-  differenceInCalendarDays,
   format,
   isBefore,
   startOfDay,
@@ -11,6 +10,7 @@ import {
   subDays,
   subWeeks,
 } from "date-fns";
+import { sortWeekdaysByWeekStart, type WeekStartsOn } from "@/lib/week";
 
 type ScheduleDay = { weekday: number };
 type Entry = { dateKey: string; value: number };
@@ -59,16 +59,20 @@ export function getCompletionRatioForDate(habits: HabitLike[], date: Date) {
   return completedCount / scheduledHabits.length;
 }
 
-export function getFrequencyLabel(habit: HabitLike) {
+export function getFrequencyLabel(
+  habit: HabitLike,
+  weekStartsOn: WeekStartsOn = 1,
+) {
   if (habit.frequency === "TIMES_PER_WEEK") {
     return `${habit.timesPerWeek ?? 0}x per week`;
   }
   if (habit.frequency === "SPECIFIC_DAYS") {
     if (habit.scheduleDays.length === 7) return "Every day";
     if (habit.scheduleDays.length === 0) return "No days set";
-    return habit.scheduleDays
-      .map((day) => day.weekday)
-      .sort((a, b) => a - b)
+    return sortWeekdaysByWeekStart(
+      habit.scheduleDays.map((day) => day.weekday),
+      weekStartsOn,
+    )
       .map((weekday) => WEEKDAY_LABELS[weekday])
       .join(", ");
   }
@@ -130,12 +134,20 @@ export function getWeeklyCompletedCount(
   return completed;
 }
 
-export function getMonthlyCompletionRate(habit: HabitLike, today: Date) {
+export function getMonthlyCompletionRate(
+  habit: HabitLike,
+  today: Date,
+  weekStartsOn: WeekStartsOn = 1,
+) {
   const monthStart = startOfMonth(today);
 
   if (habit.frequency === "TIMES_PER_WEEK") {
-    const daysElapsed = differenceInCalendarDays(today, monthStart) + 1;
-    const weeksElapsed = Math.max(1, Math.ceil(daysElapsed / 7));
+    let weeksElapsed = 0;
+    let weekStart = startOfWeek(monthStart, { weekStartsOn });
+    while (!isBefore(today, weekStart)) {
+      weeksElapsed += 1;
+      weekStart = addDays(weekStart, 7);
+    }
     const required = (habit.timesPerWeek ?? 0) * weeksElapsed;
     if (required === 0) return 0;
     const completed = habit.entries.filter(
@@ -162,13 +174,17 @@ export function getMonthlyCompletionRate(habit: HabitLike, today: Date) {
   return Math.round((completed / required) * 100);
 }
 
-export function getCurrentStreak(habit: HabitLike, today: Date) {
+export function getCurrentStreak(
+  habit: HabitLike,
+  today: Date,
+  weekStartsOn: WeekStartsOn = 1,
+) {
   if (habit.frequency === "TIMES_PER_WEEK") {
     const target = habit.timesPerWeek ?? 0;
     if (target === 0) return 0;
 
     let streak = 0;
-    let weekStart = startOfWeek(today, { weekStartsOn: 1 });
+    let weekStart = startOfWeek(today, { weekStartsOn });
     let isCurrentWeek = true;
 
     while (streak <= 520) {
@@ -222,7 +238,11 @@ export function getCurrentStreak(habit: HabitLike, today: Date) {
   return streak;
 }
 
-export function getStreakDots(habit: HabitLike, today: Date) {
+export function getStreakDots(
+  habit: HabitLike,
+  today: Date,
+  weekStartsOn: WeekStartsOn = 1,
+) {
   const map = buildEntryMap(habit.entries);
 
   if (habit.frequency === "SPECIFIC_DAYS") {
@@ -243,7 +263,7 @@ export function getStreakDots(habit: HabitLike, today: Date) {
 
   if (habit.frequency === "TIMES_PER_WEEK") {
     const target = habit.timesPerWeek ?? 0;
-    const weekStart = startOfWeek(today, { weekStartsOn: 1 });
+    const weekStart = startOfWeek(today, { weekStartsOn });
     const completed = habit.entries.filter(
       (entry) =>
         entry.value > 0 &&

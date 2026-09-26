@@ -4,6 +4,7 @@ import { Stepper } from "@/components/ui/stepper";
 import { ToggleGroup } from "@/components/ui/toggle-group";
 import { habitFrequencyValues } from "@/db/schema";
 import { CreateHabitInput } from "@/schemas/create-habit";
+import { getOrderedWeekdays, type WeekStartsOn } from "@/lib/week";
 import { Control, Controller, FieldErrors } from "react-hook-form";
 import { Text, View } from "react-native";
 
@@ -12,12 +13,19 @@ export const CadenceCard = ({
   errors,
   frequency,
   scheduleDays,
+  weekStartsOn,
 }: {
   control: Control<CreateHabitInput>;
   errors: FieldErrors<CreateHabitInput>;
   frequency: CreateHabitInput["frequency"];
   scheduleDays: number[];
+  weekStartsOn: WeekStartsOn;
 }) => {
+  const weekdayOptions = getOrderedWeekdays(weekStartsOn).map((day) => ({
+    label: day.initial,
+    value: day.weekday,
+  }));
+
   return (
     <Card>
       <Controller
@@ -57,15 +65,7 @@ export const CadenceCard = ({
                   activeItemClassName="bg-primary"
                   labelClassName="font-medium text-foreground"
                   activeLabelClassName="text-white"
-                  options={[
-                    { value: 0, label: "S" },
-                    { value: 1, label: "M" },
-                    { value: 2, label: "T" },
-                    { value: 3, label: "W" },
-                    { value: 4, label: "T" },
-                    { value: 5, label: "F" },
-                    { value: 6, label: "S" },
-                  ]}
+                  options={weekdayOptions}
                 />
               )}
             />

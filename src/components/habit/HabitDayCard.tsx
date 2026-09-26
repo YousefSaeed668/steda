@@ -6,6 +6,7 @@ import {
   toDateKey,
   type HabitLike,
 } from "@/lib/habit";
+import type { WeekStartsOn } from "@/lib/week";
 import { useAppThemeColor } from "@/theme/app-theme";
 import { Check, Rocket, Minus } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
@@ -24,6 +25,7 @@ export type HabitDayCardData = HabitLike & {
 export type HabitDayCardProps = {
   habit: HabitDayCardData;
   date: Date;
+  weekStartsOn: WeekStartsOn;
   onPress?: () => void;
   onToggle?: (completed: boolean) => void;
   isUpdating?: boolean;
@@ -33,6 +35,7 @@ export type HabitDayCardProps = {
 export function HabitDayCard({
   habit,
   date,
+  weekStartsOn,
   onPress,
   onToggle,
   isUpdating = false,
@@ -48,7 +51,7 @@ export function HabitDayCard({
   const isHistory = appearance === "history";
   const reminder = habit.reminders.find((item) => item.enabled);
   const detail = getDetailLabel(habit, reminder);
-  const streak = getCurrentStreak(habit, date);
+  const streak = getCurrentStreak(habit, date, weekStartsOn);
 
   const nameColor = isHistory
     ? completed
@@ -80,7 +83,7 @@ export function HabitDayCard({
       <View className="ml-3 flex-1">
         <Text className={`text-base font-bold ${nameColor}`}>{habit.name}</Text>
         <Text numberOfLines={1} className="mt-1 text-xs text-muted-foreground">
-          {getFrequencyLabel(habit)}{detail ? ` • ${detail}` : ""}
+          {getFrequencyLabel(habit, weekStartsOn)}{detail ? ` • ${detail}` : ""}
         </Text>
         <View className="mt-1 flex-row items-center gap-1">
           <Rocket size={13} color={warning} />

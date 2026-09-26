@@ -1,4 +1,5 @@
 import { useAppThemeColor } from "@/theme/app-theme";
+import type { WeekStartsOn } from "@/lib/week";
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 import { Pressable, Text, View } from "react-native";
 
@@ -8,7 +9,7 @@ import {
   type HabitLike,
 } from "@/lib/habit";
 
-export type WeekStartsOn = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+export type { WeekStartsOn } from "@/lib/week";
 
 export type DayStripDayProps = {
   date: Date;
