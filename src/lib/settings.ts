@@ -101,7 +101,7 @@ export const bundledSounds: BundledSound[] = [
   {
     id: "soft-notification",
     label: "Soft Notification",
-    source: require("@/assets/sounds/soft-notification.mp3"),
+    source: require("@/assets/sounds/soft_notification.mp3"),
   },
 ];
 

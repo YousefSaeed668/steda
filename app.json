@@ -51,7 +51,7 @@
           "sounds": [
             "./assets/sounds/chime.mp3",
             "./assets/sounds/bell.mp3",
-            "./assets/sounds/soft-notification.mp3"
+            "./assets/sounds/soft_notification.mp3"
           ]
         }
       ]

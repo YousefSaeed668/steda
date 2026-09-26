@@ -35,7 +35,7 @@ type ReminderSettings = {
 const bundledNotificationSounds = {
   bell: "bell.mp3",
   chime: "chime.mp3",
-  "soft-notification": "soft-notification.mp3",
+  "soft-notification": "soft_notification.mp3",
 } as const;
 
 if (Platform.OS !== "web") {
